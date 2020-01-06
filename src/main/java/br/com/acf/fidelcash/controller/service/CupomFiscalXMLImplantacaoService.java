@@ -1,5 +1,6 @@
 package br.com.acf.fidelcash.controller.service;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -14,8 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -58,30 +57,135 @@ public class CupomFiscalXMLImplantacaoService {
 	@Autowired
 	private TipoClienteRepository tipoClienteRepository;
 
-	@Transactional(rollbackFor = {Exception.class})
+	@Transactional(rollbackFor = { Exception.class })
 	public UtilDtoImplantacao implantarFidelCash(String cnpjEmpresa)
 			throws IOException, ParserConfigurationException, SAXException, ParseException, CupomFiscalXMLException {
 		try {
 			validaEmpresaImplantada(cnpjEmpresa);
 			String pasta = getPastaXML(cnpjEmpresa);
 			Map<Path, String> mapArquivos = implantarEmpresaByXml(pasta, cnpjEmpresa);
+			criarDiretoriosDeImplantacao(pasta);
 			movimentacaoDeArquivos(mapArquivos);
+			criarDiretoriosDeImportacao(pasta, cnpjEmpresa);
 			return dadosDaImplantacao(cnpjEmpresa);
 		} catch (IOException | ParseException | ParserConfigurationException | SAXException ex) {
 			throw new CupomFiscalXMLException("Arquivo inconsistente", "Arquivo inconsistente");
 		}
 	}
+
+	private void criarDiretoriosDeImportacao(String pasta, String cnpjEmpresa) throws CupomFiscalXMLException {
+		int tamanho = cnpjEmpresa.length();
+		int posicao = pasta.indexOf(cnpjEmpresa);
+		posicao = posicao + tamanho;
+		String pastaImportacaoOrigem = pasta.substring(0, posicao);
+		
+		criarDiretorioErro(pastaImportacaoOrigem);
+		
+		criarDiretorioImportados(pastaImportacaoOrigem);
+		
+		criarDiretorioRegistroDuplicado(pastaImportacaoOrigem);
+		
+		criarDiretorioUpload(pastaImportacaoOrigem);
+		
+		criarDiretorioXmlSemCpf(pastaImportacaoOrigem);
+	}
 	
-	
+	private void criarDiretoriosDeImplantacao(String pasta) throws CupomFiscalXMLException {
+		String pastaImportados = "implantacao";
+		int tamanho = pastaImportados.length();
+		int posicao = pasta.indexOf(pastaImportados);
+		posicao = posicao + tamanho;
+		String pastaImplantacao = pasta.substring(0, posicao);
+		
+		criarDiretorioImplantacaoImportados(pastaImplantacao);
+	}
+
+	private void criarDiretorioImplantacaoImportados(String pastaImplantacao) throws CupomFiscalXMLException {
+		String pastaImplantacaoImportados = pastaImplantacao + "\\importados";
+		Path pastaImportados = FileSystems.getDefault().getPath(pastaImplantacaoImportados);
+		criarDiretorio(pastaImplantacaoImportados, pastaImportados);
+		Util util = new Util();
+		util.setUtilidade("26501145000160_implantados_xml");
+		util.setPasta(pastaImplantacaoImportados);
+		util.setAcao("ARMAZENA ARQUIVOS XML IMPLANTADOS COM SUCESSO.");
+		utilRepository.save(util);
+	}
+
+	private void criarDiretorioXmlSemCpf(String pastaImportacaoOrigem) throws CupomFiscalXMLException {
+		String pastaImportacaoXmlSemCpf = pastaImportacaoOrigem + "\\importacao\\xml_sem_cpf";
+		Path pastaXmlSemCpf = FileSystems.getDefault().getPath(pastaImportacaoXmlSemCpf);
+		criarDiretorio(pastaImportacaoXmlSemCpf, pastaXmlSemCpf);
+		Util util = new Util();
+		util.setUtilidade("sem_cpf_import_xml");
+		util.setPasta(pastaImportacaoXmlSemCpf);
+		util.setAcao("ARMAZENA ARQUIVOS XML SEM INFORMACAO DO CPF DO CLIENTE.");
+		utilRepository.save(util);
+	}
+
+	private void criarDiretorioUpload(String pastaImportacaoOrigem) throws CupomFiscalXMLException {
+		String pastaImportacaoUpload = pastaImportacaoOrigem + "\\importacao\\upload";
+		Path pastaUpload = FileSystems.getDefault().getPath(pastaImportacaoUpload);
+		criarDiretorio(pastaImportacaoUpload, pastaUpload);
+		Util util = new Util();
+		util.setUtilidade("upload_import_xml");
+		util.setPasta(pastaImportacaoUpload);
+		util.setAcao("ARMAZENA ARQUIVOS XML QUE SERAO IMPORTADOS PARA O SISTEMA.");
+		utilRepository.save(util);
+	}
+
+	private void criarDiretorioRegistroDuplicado(String pastaImportacaoOrigem) throws CupomFiscalXMLException {
+		String pastaImportacaoRegistroDuplicado = pastaImportacaoOrigem + "\\importacao\\registro_duplicado";
+		Path pastaRegistroDuplicado = FileSystems.getDefault().getPath(pastaImportacaoRegistroDuplicado);
+		criarDiretorio(pastaImportacaoRegistroDuplicado, pastaRegistroDuplicado);
+		Util util = new Util();
+		util.setUtilidade("registro_duplicado_import_xml");
+		util.setPasta(pastaImportacaoRegistroDuplicado);
+		util.setAcao("ARMAZENA ARQUIVOS XML DUPLICADOS - JA FORAM IMPORTADOS PELO O SISTEMA.");
+		utilRepository.save(util);
+	}
+
+	private void criarDiretorioImportados(String pastaImportacaoOrigem) throws CupomFiscalXMLException {
+		String pastaImportacaoImportados = pastaImportacaoOrigem + "\\importacao\\importados";
+		Path pastaImportados = FileSystems.getDefault().getPath(pastaImportacaoImportados);
+		criarDiretorio(pastaImportacaoImportados, pastaImportados);
+		Util util = new Util();
+		util.setUtilidade("importados_xml");
+		util.setPasta(pastaImportacaoImportados);
+		util.setAcao("ARMAZENA ARQUIVOS XML IMPORTADOS PARA O SISTEMA.");
+		utilRepository.save(util);
+	}
+
+	private void criarDiretorioErro(String pastaImportacaoOrigem) throws CupomFiscalXMLException {
+		String pastaImportacaoErro = pastaImportacaoOrigem + "\\importacao\\erro";
+		Path pastaErro = FileSystems.getDefault().getPath(pastaImportacaoErro);
+		criarDiretorio(pastaImportacaoErro, pastaErro);
+		Util util = new Util();
+		util.setUtilidade("erro_import_xml");
+		util.setPasta(pastaImportacaoErro);
+		util.setAcao("ARMAZENA ARQUIVOS XML QUE SOFRERAM ERROS DURANTE A IMPORTACAO.");
+		utilRepository.save(util);
+	}
+
+	private void criarDiretorio(String pastaString, Path pastaPath) throws CupomFiscalXMLException {
+		if (!Files.exists(pastaPath)) {
+			File file = new File(pastaString);
+			boolean bool = file.mkdir();
+			if (!bool) {
+				throw new CupomFiscalXMLException(pastaString + " nao pode ser criada" , pastaString + " nao pode ser criada" );
+			} 
+		}
+	}
+
 	private void validaEmpresaImplantada(String cnpjEmpresa) throws CupomFiscalXMLException {
 		Optional<Empresa> empresaFind = empresaRepository.findByCnpj(new BigInteger(cnpjEmpresa));
-		if(empresaFind.isPresent()) {
+		if (empresaFind.isPresent()) {
 			throw new CupomFiscalXMLException("Empresa ja cadastrada", "Empresa ja cadastrada");
 		}
 	}
 
 	private void movimentacaoDeArquivos(Map<Path, String> mapArquivos)
 			throws IOException, ParserConfigurationException, SAXException, ParseException, CupomFiscalXMLException {
+		
 		for (Map.Entry<Path, String> entry : mapArquivos.entrySet()) {
 			try {
 				moverArquivos(entry.getKey(), entry.getValue());
@@ -90,6 +194,8 @@ public class CupomFiscalXMLImplantacaoService {
 			}
 		}
 	}
+	
+	
 
 	private String getPastaXML(String utilidade) throws CupomFiscalXMLException {
 		Optional<Util> util = utilRepository.findByEmpresaAndUtilidade(null, utilidade);
@@ -103,17 +209,17 @@ public class CupomFiscalXMLImplantacaoService {
 
 	private Map<Path, String> implantarEmpresaByXml(String directory, String cnpjEmpresa)
 			throws IOException, ParserConfigurationException, SAXException, ParseException, CupomFiscalXMLException {
-		
-		//Path arquivoException;
+
+		// Path arquivoException;
 		Map<Path, String> mapArquivo = new HashMap<>();
 		Path dir = Paths.get(directory);
 		DirectoryStream<Path> directoryStream = Files.newDirectoryStream(dir, "*.xml*");
 		int quantidadeDeRegistros = 0;
 		for (Path arquivo : directoryStream) {
-			//arquivoException = arquivo;
+			// arquivoException = arquivo;
 			try {
 				GerarDadosByXML(arquivo, cnpjEmpresa);
-				mapArquivo.put(arquivo, "import_xml");
+				mapArquivo.put(arquivo, cnpjEmpresa + "_implantados_xml");
 				quantidadeDeRegistros++;
 			} catch (CupomFiscalXMLException ex) {
 				if (ex.getMensagem().equals("Arquivo inconsistente")) {
@@ -124,14 +230,14 @@ public class CupomFiscalXMLImplantacaoService {
 					throw new CupomFiscalXMLException(ex.getMensagem(), ex.getMensagem());
 				} else if (ex.getMensagem().contains("CNPJ informado é diferente do CNPJ do arquivo")) {
 					throw new CupomFiscalXMLException(ex.getMensagem(), ex.getMensagem());
-				}else {
+				} else {
 					throw new CupomFiscalXMLException("Erro na Implantacao", "Erro na implantacao");
 				}
 			} catch (IOException | ParseException | ParserConfigurationException | SAXException ex) {
 				throw new CupomFiscalXMLException("Erro na Implantacao", "Erro na implantacao");
 			}
 		}
-		if(quantidadeDeRegistros == 0) {
+		if (quantidadeDeRegistros == 0) {
 			throw new CupomFiscalXMLException("Nenhum arquivo xml encontrado", "Nenhum arquivo xml encontrado");
 		}
 		directoryStream.close();
@@ -146,33 +252,22 @@ public class CupomFiscalXMLImplantacaoService {
 			CupomFiscalXML cfXML = new CupomFiscalXML(xml);
 			Empresa empresaXML = cfXML.getEmpresa();
 			List<Produto> produtos = cfXML.getProdutos();
-			// CupomFiscal cupomFiscal = cfXML.getCupomFiscal();
-			// List<CupomFiscalItem> itens = cfXML.getItens();
-			// Cliente cliente = cfXML.getCliente();
-			//if (operacao == "implantacao") {
-				validaCnpjImplantacao(xml, new BigInteger(cnpjEmpresa), empresaXML.getCnpj());
-				Empresa empresa = setEmpresa(empresaXML, cfXML);
-
-				setTipoCliente(empresa);
-				for (int i = 0; i < produtos.size(); i++) {
-					setProduto(produtos.get(i), empresa);
-				}
-			//} 
-			/*
-				 * else { empresa = validaImportacaoEmpresa(empresa.getCnpj()); TipoCliente
-				 * tipoCliente = validaImportacaoTipoCliente(empresa, "PADRAO"); cliente =
-				 * validaImportacaoCliente(cliente, tipoCliente); cupomFiscal =
-				 * setCupomFiscal(cupomFiscal, empresa, cliente); setCupomFiscalItem(produtos,
-				 * itens, empresa, cupomFiscal); }
-				 */
+			validaCnpjImplantacao(xml, new BigInteger(cnpjEmpresa), empresaXML.getCnpj());
+			Empresa empresa = setEmpresa(empresaXML, cfXML);
+			setTipoCliente(empresa);
+			for (int i = 0; i < produtos.size(); i++) {
+				setProduto(produtos.get(i), empresa);
+			}
 		} catch (IOException | ParseException | ParserConfigurationException | SAXException e) {
 			throw new CupomFiscalXMLException("Arquivo inconsistente", "Arquivo inconsistente");
 		}
 	}
-	
-	private void validaCnpjImplantacao(String arquivo, BigInteger cnpjParametro, BigInteger cnpjXml) throws CupomFiscalXMLException {
-		if(cnpjParametro.compareTo(cnpjXml) != 0) {
-			throw new CupomFiscalXMLException("CNPJ informado é diferente do CNPJ do arquivo "+arquivo, "CNPJ informado é diferente do CNPJ do arquivo "+arquivo);
+
+	private void validaCnpjImplantacao(String arquivo, BigInteger cnpjParametro, BigInteger cnpjXml)
+			throws CupomFiscalXMLException {
+		if (cnpjParametro.compareTo(cnpjXml) != 0) {
+			throw new CupomFiscalXMLException("CNPJ informado é diferente do CNPJ do arquivo " + arquivo,
+					"CNPJ informado é diferente do CNPJ do arquivo " + arquivo);
 		}
 	}
 
@@ -181,7 +276,6 @@ public class CupomFiscalXMLImplantacaoService {
 		String pastaOperacao = getPastaXML(operacao);
 		String stringArquivoDestino = pastaOperacao + arquivo.getFileName();
 		Path arquivoDestino = FileSystems.getDefault().getPath(stringArquivoDestino);
-		// Path diretorioDestino = FileSystems.getDefault().getPath(pastaOperacao);
 		try {
 			Files.move(arquivo, arquivoDestino, StandardCopyOption.ATOMIC_MOVE);
 		} catch (IOException e) {
@@ -242,27 +336,27 @@ public class CupomFiscalXMLImplantacaoService {
 
 	private UtilDtoImplantacao dadosDaImplantacao(String cnpjEmpresa) {
 		UtilDtoImplantacao utilDto = new UtilDtoImplantacao();
-		
+
 		Optional<Util> util = utilRepository.findByEmpresaAndUtilidade(null, cnpjEmpresa);
 		utilDto = dadosUtil(util, utilDto);
-		
+
 		Optional<Empresa> empresa = empresaRepository.findByCnpj(new BigInteger(cnpjEmpresa));
 		utilDto = dadosEmpresa(empresa, utilDto);
-		
+
 		Optional<Endereco> endereco = enderecoRepository.findById(empresa.get().getEndereco().getId());
 		utilDto = dadosEndereco(endereco, utilDto);
-		
+
 		Optional<TipoCliente> tipoCliente = tipoClienteRepository.findByEmpresaAndDescricao(empresa.get(), "PADRAO");
 		utilDto = dadosTipoCliente(tipoCliente, utilDto);
-		
+
 		List<Produto> produtos = produtoRepository.findByEmpresa(empresa);
 		utilDto = dadosProdutos(produtos, utilDto);
-		
+
 		return utilDto;
 	}
 
 	private UtilDtoImplantacao dadosProdutos(List<Produto> produtos, UtilDtoImplantacao utilDto) {
-		if(produtos.isEmpty()) {
+		if (produtos.isEmpty()) {
 			utilDto.setErro(true);
 			utilDto.setErroMensagem("Nenhum produto cadastrado");
 		} else {
@@ -272,7 +366,7 @@ public class CupomFiscalXMLImplantacaoService {
 	}
 
 	private UtilDtoImplantacao dadosTipoCliente(Optional<TipoCliente> tipoCliente, UtilDtoImplantacao utilDto) {
-		if(tipoCliente.isEmpty() ) {
+		if (tipoCliente.isEmpty()) {
 			utilDto.setErro(true);
 			utilDto.setErroMensagem("Nenhum endereço cadastrado");
 		} else {
@@ -282,7 +376,7 @@ public class CupomFiscalXMLImplantacaoService {
 	}
 
 	private UtilDtoImplantacao dadosEndereco(Optional<Endereco> endereco, UtilDtoImplantacao utilDto) {
-		if(endereco.isEmpty()) {
+		if (endereco.isEmpty()) {
 			utilDto.setErro(true);
 			utilDto.setErroMensagem("Nenhum endereço cadastrado");
 		} else {
@@ -304,9 +398,10 @@ public class CupomFiscalXMLImplantacaoService {
 	private UtilDtoImplantacao dadosUtil(Optional<Util> util, UtilDtoImplantacao utilDto) {
 		if (util.isEmpty()) {
 			utilDto.setErro(true);
-			utilDto.setErroMensagem(util.get().getUtilidade() + " nao está cadastrado na coluna utilidade da tabela Util");
+			utilDto.setErroMensagem(
+					util.get().getUtilidade() + " nao está cadastrado na coluna utilidade da tabela Util");
 		} else {
-			utilDto.setUtil(util.get()); 
+			utilDto.setUtil(util.get());
 		}
 		return utilDto;
 	}
