@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.xml.sax.SAXException;
 
+import br.com.acf.fidelcash.controller.dto.ImportacaoDto;
 import br.com.acf.fidelcash.controller.dto.UtilDtoImplantacao;
 import br.com.acf.fidelcash.controller.service.CupomFiscalXMLImplantacaoService;
 import br.com.acf.fidelcash.controller.service.CupomFiscalXMLImportacaoService;
@@ -47,16 +48,17 @@ public class CupomFiscalXMLController {
     }
 	
 	@PostMapping("/importacao")
-	public String importarXml() {
-		String retorno = "";
-			try {
-				retorno = cfImporta.importarXml();
-			} catch (IOException | ParserConfigurationException | SAXException | ParseException
-					| CupomFiscalXMLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			return retorno;
+	public ResponseEntity<ImportacaoDto> importarXml() {
+		ImportacaoDto importacao;
+		try {
+			importacao =  cfImporta.importarXml();
+			return ResponseEntity.ok(importacao);
+		} catch (IOException | ParserConfigurationException | SAXException | ParseException
+				| CupomFiscalXMLException e) {
+			importacao = new ImportacaoDto();
+			importacao.setErro("Erro ao importar arquivos XML.");
+			return ResponseEntity.badRequest().body(importacao);
+		}
 	}
 	
 	

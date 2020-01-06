@@ -9,6 +9,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.xml.sax.SAXException;
 
+import br.com.acf.fidelcash.controller.dto.ImportacaoDto;
 import br.com.acf.fidelcash.modelo.Cliente;
 import br.com.acf.fidelcash.modelo.CupomFiscal;
 import br.com.acf.fidelcash.modelo.CupomFiscalItem;
@@ -65,13 +68,14 @@ public class CupomFiscalXMLImportacaoService {
 	private CupomFiscalItemRepository cupomFiscalItemRepository;
 	
 	@Transactional(rollbackFor = {Exception.class})
-	public String importarXml()
+	public ImportacaoDto importarXml()
 			throws IOException, ParserConfigurationException, SAXException, ParseException, CupomFiscalXMLException {
 		try {
 			List<Util> pastas = getPastaImportacaoXML("upload_import_xml");
 			Map<Path, String> mapArquivos = importarXml(pastas.get(0).getPasta(), pastas.get(0).getEmpresa());
-			movimentacaoDeArquivos(mapArquivos, pastas.get(0).getEmpresa());
-			return "sucesso";
+			List<String> arquivos = movimentacaoDeArquivos(mapArquivos, pastas.get(0).getEmpresa());
+			Collections.sort(arquivos);
+			return setImportacaoDto(pastas.get(0).getPasta(), arquivos);
 		} catch (IOException | ParseException | ParserConfigurationException | SAXException ex) {
 			throw new CupomFiscalXMLException("Arquivo inconsistente", "Arquivo inconsistente");
 		}
@@ -132,18 +136,21 @@ public class CupomFiscalXMLImportacaoService {
 		return mapArquivo;
 	}
 	
-	private void movimentacaoDeArquivos(Map<Path, String> mapArquivos, Empresa empresa)
+	private List<String> movimentacaoDeArquivos(Map<Path, String> mapArquivos, Empresa empresa)
 			throws IOException, ParserConfigurationException, SAXException, ParseException, CupomFiscalXMLException {
+		List<String> arquivos = new ArrayList<String>();
 		for (Map.Entry<Path, String> entry : mapArquivos.entrySet()) {
 			try {
-				moverArquivos(entry.getKey(), entry.getValue(), empresa);
+				String arquivo = moverArquivos(entry.getKey(), entry.getValue(), empresa);
+				arquivos.add(arquivo);
 			} catch (IOException e) {
 				throw new CupomFiscalXMLException("Arquivo inconsistente", "Arquivo inconsistente");
 			}
 		}
+		return arquivos;
 	}
 	
-	private void moverArquivos(Path arquivo, String operacao, Empresa empresa) throws FileNotFoundException, IOException,
+	private String moverArquivos(Path arquivo, String operacao, Empresa empresa) throws FileNotFoundException, IOException,
 			CupomFiscalXMLException, ParseException, ParserConfigurationException, SAXException {
 		String oper;
 		if ((operacao.equals("importados_xml")) || (operacao.equals("sem_cpf_import_xml")) || (operacao.equals("registro_duplicado_import_xml"))) {
@@ -159,17 +166,22 @@ public class CupomFiscalXMLImportacaoService {
 			stringArquivoDestino = pastaOperacao.getPasta() + arquivo.getFileName();
 		}
 		Path arquivoDestino = FileSystems.getDefault().getPath(stringArquivoDestino);
-		// Path diretorioDestino = FileSystems.getDefault().getPath(pastaOperacao);
 		try {
 			if((operacao.equals("importados_xml")) || (operacao.equals("sem_cpf_import_xml")) || (operacao.equals("registro_duplicado_import_xml"))){
 				Files.move(arquivo, arquivoDestino, StandardCopyOption.ATOMIC_MOVE);
 			} else {
 				Files.copy(arquivo, arquivoDestino, StandardCopyOption.REPLACE_EXISTING);
 			}
+			return arquivoDestino.toString();
 				
 		} catch (IOException e) {
 			throw new CupomFiscalXMLException("Arquivo inconsistente", "Arquivo inconsistente");
 		}
+	}
+	
+	private ImportacaoDto setImportacaoDto(String pastaOrigem, List<String> arquivos) {
+		ImportacaoDto importacaoDto = new ImportacaoDto(pastaOrigem, arquivos);
+		return importacaoDto;
 	}
 	
 	private Util getPastaUtilidadeXML(Empresa empresa, String utilidade) throws CupomFiscalXMLException {
