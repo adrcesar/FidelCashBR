@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.text.ParseException;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,9 +28,11 @@ import br.com.acf.fidelcash.modelo.exception.CupomFiscalXMLException;
 import br.com.acf.fidelcash.repository.EmpresaRepository;
 import br.com.acf.fidelcash.repository.EnderecoRepository;
 import br.com.acf.fidelcash.repository.ProdutoRepository;
+import br.com.acf.fidelcash.repository.TipoClienteLogRepository;
 import br.com.acf.fidelcash.repository.TipoClienteRepository;
 import br.com.acf.fidelcash.repository.UtilRepository;
 import br.com.acf.fidelcash.modelo.TipoCliente;
+import br.com.acf.fidelcash.modelo.TipoClienteLog;
 import br.com.acf.fidelcash.modelo.SituacaoTipoCliente;
 import br.com.acf.fidelcash.modelo.Util;
 import br.com.acf.fidelcash.controller.dto.UtilDtoImplantacao;
@@ -56,6 +59,9 @@ public class CupomFiscalXMLImplantacaoService {
 
 	@Autowired
 	private TipoClienteRepository tipoClienteRepository;
+	
+	@Autowired
+	private TipoClienteLogRepository tipoClienteLogRepository;
 
 	@Transactional(rollbackFor = { Exception.class })
 	public UtilDtoImplantacao implantarFidelCash(String cnpjEmpresa)
@@ -338,6 +344,12 @@ public class CupomFiscalXMLImplantacaoService {
 				tipoCliente.setEmpresa(empresa);
 				tipoCliente.setSituacao(SituacaoTipoCliente.ATIVO);
 				tipoClienteRepository.save(tipoCliente);
+				
+				TipoClienteLog log = new TipoClienteLog();
+				log.setTipoCliente(tipoCliente);
+				log.setBonus(tipoCliente.getBonus());
+				log.setData_inicio(LocalDateTime.now().minusDays(3650));// verificar como tratar este parametro no futuro
+				tipoClienteLogRepository.save(log);
 			}
 		} catch (Exception ex) {
 			throw new CupomFiscalXMLException("Tipo de Cliente invalido", "Tipo de Cliente invalido");
