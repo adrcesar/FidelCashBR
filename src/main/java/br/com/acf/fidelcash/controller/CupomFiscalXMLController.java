@@ -2,6 +2,8 @@ package br.com.acf.fidelcash.controller;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -48,16 +50,15 @@ public class CupomFiscalXMLController {
     }
 	
 	@PostMapping("/importacao")
-	public ResponseEntity<ImportacaoDto> importarXml() {
-		ImportacaoDto importacao;
+	public ResponseEntity<List<ImportacaoDto>> importarXml() {
 		try {
-			importacao =  cfImporta.importarXml();
+			List<ImportacaoDto> importacao =  cfImporta.importarXml();
 			return ResponseEntity.ok(importacao);
 		} catch (IOException | ParserConfigurationException | SAXException | ParseException
 				| CupomFiscalXMLException e) {
-			importacao = new ImportacaoDto();
-			importacao.setErro("Erro ao importar arquivos XML.");
-			return ResponseEntity.badRequest().body(importacao);
+			List<ImportacaoDto >importacaoErro = new ArrayList<ImportacaoDto>();
+			importacaoErro.get(0).setErro("Erro ao importar arquivos XML.");
+			return ResponseEntity.badRequest().body(importacaoErro);
 		}
 	}
 	

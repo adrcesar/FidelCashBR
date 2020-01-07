@@ -68,14 +68,19 @@ public class CupomFiscalXMLImportacaoService {
 	private CupomFiscalItemRepository cupomFiscalItemRepository;
 	
 	@Transactional(rollbackFor = {Exception.class})
-	public ImportacaoDto importarXml()
+	public List<ImportacaoDto> importarXml()
 			throws IOException, ParserConfigurationException, SAXException, ParseException, CupomFiscalXMLException {
 		try {
 			List<Util> pastas = getPastaImportacaoXML("upload_import_xml");
-			Map<Path, String> mapArquivos = importarXml(pastas.get(0).getPasta(), pastas.get(0).getEmpresa());
-			List<String> arquivos = movimentacaoDeArquivos(mapArquivos, pastas.get(0).getEmpresa());
-			Collections.sort(arquivos);
-			return setImportacaoDto(pastas.get(0).getPasta(), arquivos);
+			List<ImportacaoDto> importacaoDto = new ArrayList<ImportacaoDto>();
+			for (int i = 0; i < pastas.size(); i++) {
+				Map<Path, String> mapArquivos = importarXml(pastas.get(i).getPasta(), pastas.get(i).getEmpresa());
+				List<String> arquivos = movimentacaoDeArquivos(mapArquivos, pastas.get(i).getEmpresa());
+				Collections.sort(arquivos);
+				ImportacaoDto importacaoEmpresaDto = setImportacaoDto(pastas.get(i).getPasta(), arquivos);
+				importacaoDto.add(importacaoEmpresaDto);
+			}
+			return importacaoDto;
 		} catch (IOException | ParseException | ParserConfigurationException | SAXException ex) {
 			throw new CupomFiscalXMLException("Arquivo inconsistente", "Arquivo inconsistente");
 		}
