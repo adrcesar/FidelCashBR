@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.text.ParseException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,6 +26,7 @@ import org.xml.sax.SAXException;
 
 import br.com.acf.fidelcash.controller.dto.ImportacaoDto;
 import br.com.acf.fidelcash.modelo.Cliente;
+import br.com.acf.fidelcash.modelo.ContaCorrente;
 import br.com.acf.fidelcash.modelo.CupomFiscal;
 import br.com.acf.fidelcash.modelo.CupomFiscalItem;
 import br.com.acf.fidelcash.modelo.CupomFiscalXML;
@@ -33,13 +35,16 @@ import br.com.acf.fidelcash.modelo.Produto;
 import br.com.acf.fidelcash.modelo.SituacaoEmpresa;
 import br.com.acf.fidelcash.modelo.SituacaoTipoCliente;
 import br.com.acf.fidelcash.modelo.TipoCliente;
+import br.com.acf.fidelcash.modelo.TipoClienteLog;
 import br.com.acf.fidelcash.modelo.Util;
 import br.com.acf.fidelcash.modelo.exception.CupomFiscalXMLException;
 import br.com.acf.fidelcash.repository.ClienteRepository;
+import br.com.acf.fidelcash.repository.ContaCorrenteRepository;
 import br.com.acf.fidelcash.repository.CupomFiscalItemRepository;
 import br.com.acf.fidelcash.repository.CupomFiscalRepository;
 import br.com.acf.fidelcash.repository.EmpresaRepository;
 import br.com.acf.fidelcash.repository.ProdutoRepository;
+import br.com.acf.fidelcash.repository.TipoClienteLogRepository;
 import br.com.acf.fidelcash.repository.TipoClienteRepository;
 import br.com.acf.fidelcash.repository.UtilRepository;
 
@@ -66,6 +71,12 @@ public class CupomFiscalXMLImportacaoService {
 	
 	@Autowired
 	private CupomFiscalItemRepository cupomFiscalItemRepository;
+	
+	@Autowired
+	private ContaCorrenteRepository contaCorrenteRepository;
+	
+	@Autowired
+	private TipoClienteLogRepository tipoClienteLogRepository;
 	
 	@Transactional(rollbackFor = {Exception.class})
 	public List<ImportacaoDto> importarXml()
@@ -302,12 +313,92 @@ public class CupomFiscalXMLImportacaoService {
 				cupomFiscalItem.setCupomFiscal(cupomFiscal);
 				cupomFiscalItem.setProduto(prod);
 				cupomFiscalItemRepository.save(cupomFiscalItem);
+				
+				List<CupomFiscalItem> cfItens = cupomFiscalItemRepository.findFirstByCupomFiscalOrderByIdDesc(cupomFiscal);
+				setContaCorrente(cfItens.get(0));
+				
 			}
 		} catch (Exception e) {
-			throw new CupomFiscalXMLException("Erro Item do Cupom Fiscal", "Erro item do Cupom Fiscal");
+			throw new CupomFiscalXMLException("Erro Item do Cupom Fiscal", "Erro Item do Cupom Fiscal");
 		}
 	}
 	
+	private void setContaCorrente(CupomFiscalItem cfItem) {
+		CupomFiscal cf = cfItem.getCupomFiscal();
+		Empresa empresa = cfItem.getCupomFiscal().getCliente().getTipoCliente().getEmpresa();
+		Cliente cliente = cfItem.getCupomFiscal().getCliente();
+		List<ContaCorrente> lancamentosPosteriores = LancamentosPosterioresAoAtual(empresa, cliente, cf);
+		float saldo = 0;
+		if(lancamentosPosteriores.isEmpty()) {
+			saldo = getSaldoEmpresaCliente(empresa, cliente);
+			insertCC(cfItem, saldo);
+		}
+		System.out.println(saldo);
+		
+	}
+	
+	private List<ContaCorrente> LancamentosPosterioresAoAtual(Empresa empresa, Cliente cliente, CupomFiscal cf) {
+		List<ContaCorrente> itens = contaCorrenteRepository.findByEmpresaAndClienteAndDataCompraSuperiorQueAtual(empresa, cliente, cf.getDataCompra());
+		return itens;
+	}
+	
+	private float getSaldoEmpresaCliente(Empresa empresa, Cliente cliente) {
+		List<ContaCorrente> cc = new ArrayList<ContaCorrente>();
+		cc = contaCorrenteRepository.findFirstByEmpresaAndClienteOrderByIdDesc(empresa, cliente);
+		float saldo = 0;
+		if(cc.isEmpty()) {
+			saldo = 0;
+		} else {
+			saldo = cc.get(0).getSaldo();
+		}
+		return saldo;
+	}
+	
+	private void insertCC(CupomFiscalItem cfItem, float saldoAnterior) {
+		ContaCorrente cc = new ContaCorrente();
+		cc.setCupomFiscalItem(cfItem);
+		if (Float.compare(cfItem.getValorDesconto(), 0) == 0)  {
+			cc.setBonus(0);
+			cc.setDebito(0);
+			float bonusPercentual = bonusDoPeriodo(cfItem);
+			float credito = ((cfItem.getValorItem() * bonusPercentual) / 100);
+			cc.setCredito(credito);
+			cc.setSaldo(saldoAnterior + credito);
+			contaCorrenteRepository.save(cc);
+		} else {
+			cc.setBonus(0);
+			cc.setCredito(0);
+			cc.setDebito(cfItem.getValorDesconto());
+			cc.setSaldo(saldoAnterior - cfItem.getValorDesconto());
+			contaCorrenteRepository.save(cc);
+		}
+	}
+	
+	public float bonusDoPeriodo(CupomFiscalItem cfItem) {
+		Empresa emp = cfItem.getCupomFiscal().getCliente().getTipoCliente().getEmpresa();
+		List<TipoClienteLog> log = tipoClienteLogRepository.findByTipoClienteEmpresaOrderById(emp);
+		float bonus = 0;
+		for (int i = 0; i < log.size(); i++) {
+			LocalDateTime dataInicio = log.get(i).getData_inicio();
+			LocalDateTime dataFim = log.get(i).getData_fim();
+			if(dataFim == null) {
+				dataFim = LocalDateTime.now(); 
+			}
+			LocalDateTime dataCupom = cfItem.getCupomFiscal().getDataCompra();
+			
+			int compareDataInicio = dataCupom.compareTo(dataInicio);
+			int compareDataFim = dataCupom.compareTo(dataFim);
+			
+			if(compareDataInicio >= 0 && compareDataFim <= 0) {
+				bonus = log.get(i).getBonus();
+				break;
+			}
+		}
+		return bonus;
+	}
+	
+	
+
 	private Produto setProduto(Produto produto, Empresa empresa) {
         Produto prod = produto;
         prod.setEmpresa(empresa);

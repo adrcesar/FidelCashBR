@@ -1,6 +1,7 @@
 package br.com.acf.fidelcash.modelo;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -94,6 +95,8 @@ public class TipoClienteLog {
 	public void setData_fim(LocalDateTime data_fim) {
 		this.data_fim = data_fim;
 	}
+
+	
 	
 	
     
