@@ -12,7 +12,7 @@ public interface ProdutoRepository extends JpaRepository<Produto, Integer>{
 
 	Optional<Produto> findByEmpresaAndCodigoProduto(Empresa empresa, String codigoProduto);
 
-	List<Produto> findByEmpresa(Optional<Empresa> empresa);
+	List<Produto> findByEmpresa(Empresa empresa);
 	
 	
 

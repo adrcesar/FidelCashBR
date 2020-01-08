@@ -1,7 +1,6 @@
 package br.com.acf.fidelcash.modelo;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
