@@ -19,10 +19,13 @@ public class ContaCorrente {
 	@ManyToOne
 	private CupomFiscalItem cupomFiscalItem;
 	
-	private float bonus;
 	private float credito;
 	private float debito;
 	private float saldo;
+	
+	@JoinColumn(name = "id_tipo_cliente_log", referencedColumnName = "id")
+	@ManyToOne
+	private TipoClienteLog tipoClienteLog;
 	
 	public ContaCorrente() {
 		
@@ -73,14 +76,6 @@ public class ContaCorrente {
 		this.cupomFiscalItem = cupomFiscalItem;
 	}
 
-	public float getBonus() {
-		return bonus;
-	}
-
-	public void setBonus(float bonus) {
-		this.bonus = bonus;
-	}
-
 	public float getCredito() {
 		return credito;
 	}
@@ -104,6 +99,16 @@ public class ContaCorrente {
 	public void setSaldo(float saldo) {
 		this.saldo = saldo;
 	}
+
+	public TipoClienteLog getTipoClienteLog() {
+		return tipoClienteLog;
+	}
+
+	public void setTipoClienteLog(TipoClienteLog tipoClienteLog) {
+		this.tipoClienteLog = tipoClienteLog;
+	}
+	
+	
 
 	
 	

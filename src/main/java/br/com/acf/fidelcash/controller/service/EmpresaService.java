@@ -49,4 +49,20 @@ public class EmpresaService {
 	public Optional<Empresa> findByCnpj(BigInteger cnpj) {
 		return empresaRepository.findByCnpj(cnpj);
 	}
+
+	public Empresa validaImportacaoEmpresa(Empresa empresaXML, Empresa empresaUtil) throws EmpresaServiceException {
+		if(empresaXML.getCnpj().compareTo(empresaUtil.getCnpj()) != 0) {
+			throw new EmpresaServiceException("CNPJ da empresa do XML diferente do CNPJ cadastrado na tabela Util", "CNPJ da empresa do XML diferente do CNPJ cadastrado na tabela Util");
+		}
+		Optional<Empresa> empresaFind = empresaRepository.findByCnpj(empresaXML.getCnpj());
+        if (empresaFind.isEmpty()) {
+            throw new EmpresaServiceException("Empresa do arquivo xml nao cadastrada no sistema", "Empresa do arquivo xml nao cadastrada no sistema");
+        } else {
+            if (empresaFind.get().getSituacao() == SituacaoEmpresa.INATIVA) {
+                throw new EmpresaServiceException("Empresa Inativa", "Empresa Inativa");
+            }
+            return empresaFind.get();
+        }
+		
+	}
 }

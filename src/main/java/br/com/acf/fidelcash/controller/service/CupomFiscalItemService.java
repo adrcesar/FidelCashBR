@@ -6,8 +6,10 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import br.com.acf.fidelcash.controller.dto.CupomFiscalItemExtratoDto;
+import br.com.acf.fidelcash.controller.service.exception.CupomFiscalItemServiceException;
+import br.com.acf.fidelcash.modelo.CupomFiscal;
 import br.com.acf.fidelcash.modelo.CupomFiscalItem;
+import br.com.acf.fidelcash.modelo.Produto;
 import br.com.acf.fidelcash.repository.CupomFiscalItemRepository;
 
 @Service
@@ -16,33 +18,29 @@ public class CupomFiscalItemService {
 	@Autowired
 	private CupomFiscalItemRepository cfItemRepository;
 	
-	public List<CupomFiscalItem> findByClienteOrderByCupomFiscalDataCompra(int idCliente) {
-		return cfItemRepository.findByClienteOrderByCupomFiscalDataCompra(idCliente);
-	}
+	@Autowired
+	private ProdutoService produtoService;
 
-	public List<CupomFiscalItemExtratoDto> geraExtrato(List<CupomFiscalItem> cfItens) {
-		float valorItem = 0;
-		float bonusPercentual = 0;
-		float bonusValor = 0;
-		float saldo = 0;
-		List<CupomFiscalItemExtratoDto> extrato = new ArrayList<CupomFiscalItemExtratoDto>();
-		for (int i = 0; i < cfItens.size(); i++) {
-			CupomFiscalItemExtratoDto lancamento = new CupomFiscalItemExtratoDto(cfItens.get(i));
-			if (Float.compare(cfItens.get(i).getValorDesconto(), 0) == 0)  {
-				valorItem = cfItens.get(i).getValorItem();
-				bonusPercentual = cfItens.get(i).getCupomFiscal().getCliente().getTipoCliente().getBonus();
-				bonusValor = ((valorItem * bonusPercentual) / 100);
-				saldo = saldo + bonusValor;
-				lancamento.gerarCredito(bonusValor, saldo);
-				extrato.add(lancamento);
-			} else {
-				saldo = saldo - cfItens.get(i).getValorDesconto();
-				lancamento.gerarDebito(cfItens.get(i).getValorDesconto(), saldo);
-				extrato.add(lancamento);
+	public List<CupomFiscalItem> setCupomFiscalItem(List<Produto> produtos, List<CupomFiscalItem> itens, CupomFiscal cupomFiscal) throws CupomFiscalItemServiceException {
+		try {
+			List<CupomFiscalItem> cfItens =  new ArrayList<CupomFiscalItem>();
+			for (int i = 0; i < produtos.size(); i++) {
+				Produto prod = produtoService.setProduto(produtos.get(i), cupomFiscal.getCliente().getTipoCliente().getEmpresa());
+				CupomFiscalItem cupomFiscalItem;
+				cupomFiscalItem = itens.get(i);
+				cupomFiscalItem.setCupomFiscal(cupomFiscal);
+				cupomFiscalItem.setProduto(prod);
+				cfItemRepository.save(cupomFiscalItem);
+				cfItens.add(cupomFiscalItem);
 			}
-			
+			return cfItens;
+		} catch (Exception  e) {
+			throw new CupomFiscalItemServiceException("Erro Item do Cupom Fiscal", "Erro Item do Cupom Fiscal");
 		}
-		return extrato;
 	}
+	
+	
+	
+	
 
 }

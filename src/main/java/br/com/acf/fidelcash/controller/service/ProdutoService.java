@@ -22,8 +22,7 @@ public class ProdutoService {
 		try {
 			Produto prod = produto;
 			prod.setEmpresa(empresa);
-			Optional<Produto> produtoFind = produtoRepository.findByEmpresaAndCodigoProduto(empresa,
-					prod.getCodigoProduto());
+			Optional<Produto> produtoFind = produtoRepository.findByEmpresaAndCodigoProduto(empresa, prod.getCodigoProduto());
 			if (produtoFind.isEmpty()) {
 				produtoRepository.save(prod);
 				produtoFind = produtoRepository.findByEmpresaAndCodigoProduto(empresa, prod.getCodigoProduto());
@@ -34,7 +33,7 @@ public class ProdutoService {
 		}
 
 	}
-
+	
 	public List<Produto> findByEmpresa(Empresa empresa) {
 		return produtoRepository.findByEmpresa(empresa);
 	}

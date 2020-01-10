@@ -47,4 +47,19 @@ public class TipoClienteService {
 		return tipoClienteRepository.findByEmpresaAndDescricao(empresa, string);
 	}
 
+	public TipoCliente validaImportacaoTipoCliente(Empresa empresa, String descricao) throws TipoClienteServiceException {
+        Optional<TipoCliente> tipoClienteFind = tipoClienteRepository.findByEmpresaAndDescricao(empresa, descricao);
+        if (tipoClienteFind.isEmpty()) {
+            throw new TipoClienteServiceException("Tipo de Cliente PADRAO inexistente", "Tipo de Cliente PADRAO inexistente");
+        } else {
+            if (tipoClienteFind.get().getBonus() < 1) {
+                throw new TipoClienteServiceException("Bonus do Tipo de Cliente PADRAO inferior A 1%", "Bonus do Tipo de Cliente PADRAO inferior A 1%");
+            }
+            if (tipoClienteFind.get().getSituacao() == SituacaoTipoCliente.INATIVO) {
+                throw new TipoClienteServiceException("Situacao do Tipo de Cliente PADRAO Inativa", "Situacao do Tipo de Cliente PADRAO Inativa");
+            }
+            return tipoClienteFind.get();
+        }
+    }
+
 }

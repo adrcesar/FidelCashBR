@@ -27,7 +27,7 @@ import br.com.acf.fidelcash.controller.dto.UtilDtoImplantacao;
 import br.com.acf.fidelcash.controller.service.exception.EmpresaServiceException;
 import br.com.acf.fidelcash.controller.service.exception.ProdutoServiceException;
 import br.com.acf.fidelcash.controller.service.exception.TipoClienteServiceException;
-import br.com.acf.fidelcash.controller.service.exception.UtilRepositoryException;
+import br.com.acf.fidelcash.controller.service.exception.UtilServiceException;
 import br.com.acf.fidelcash.modelo.CupomFiscalXML;
 import br.com.acf.fidelcash.modelo.Empresa;
 import br.com.acf.fidelcash.modelo.Produto;
@@ -52,7 +52,7 @@ public class CupomFiscalXMLImplantacaoService {
 	
 	@Transactional(rollbackFor = { Exception.class })
 	public UtilDtoImplantacao implantarFidelCash(String cnpjEmpresa)
-			throws CupomFiscalXMLException, EmpresaServiceException, UtilRepositoryException {
+			throws CupomFiscalXMLException, EmpresaServiceException, UtilServiceException {
 		try {
 			empresaService.validaEmpresaImplantada(cnpjEmpresa);
 			String pasta = utilService.getPastaXML(cnpjEmpresa);
@@ -159,7 +159,7 @@ public class CupomFiscalXMLImplantacaoService {
 	}
 
 	private void movimentacaoDeArquivos(Map<Path, String> mapArquivos)
-			throws IOException, ParserConfigurationException, SAXException, ParseException, CupomFiscalXMLException, UtilRepositoryException {
+			throws IOException, ParserConfigurationException, SAXException, ParseException, CupomFiscalXMLException, UtilServiceException {
 		
 		for (Map.Entry<Path, String> entry : mapArquivos.entrySet()) {
 			try {
@@ -227,7 +227,7 @@ public class CupomFiscalXMLImplantacaoService {
 	}
 
 	private void moverArquivos(Path arquivo, String operacao) throws FileNotFoundException, IOException,
-			CupomFiscalXMLException, ParseException, ParserConfigurationException, SAXException, UtilRepositoryException {
+			CupomFiscalXMLException, ParseException, ParserConfigurationException, SAXException, UtilServiceException {
 		String pastaOperacao = utilService.getPastaXML(operacao);
 		String stringArquivoDestino = pastaOperacao + arquivo.getFileName();
 		Path arquivoDestino = FileSystems.getDefault().getPath(stringArquivoDestino);

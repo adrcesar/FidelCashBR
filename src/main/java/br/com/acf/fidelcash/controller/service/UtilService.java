@@ -7,12 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.com.acf.fidelcash.controller.dto.UtilDtoImplantacao;
-import br.com.acf.fidelcash.controller.service.exception.UtilRepositoryException;
+import br.com.acf.fidelcash.controller.service.exception.UtilServiceException;
 import br.com.acf.fidelcash.modelo.Empresa;
 import br.com.acf.fidelcash.modelo.Endereco;
 import br.com.acf.fidelcash.modelo.Produto;
 import br.com.acf.fidelcash.modelo.TipoCliente;
 import br.com.acf.fidelcash.modelo.Util;
+import br.com.acf.fidelcash.modelo.exception.CupomFiscalXMLException;
 import br.com.acf.fidelcash.repository.UtilRepository;
 
 @Service
@@ -20,12 +21,12 @@ public class UtilService {
 	@Autowired
 	private UtilRepository utilRepository;
 	
-	public String getPastaXML(String utilidade) throws UtilRepositoryException {
+	public String getPastaXML(String utilidade) throws UtilServiceException {
 		Optional<Util> util = utilRepository.findByEmpresaAndUtilidade(null, utilidade);
 		if (util.isPresent()) {
 			return util.get().getPasta();
 		} else {
-			throw new UtilRepositoryException(utilidade + " nao esta cadastrado na coluna utilidade da tabela Util",
+			throw new UtilServiceException(utilidade + " nao esta cadastrado na coluna utilidade da tabela Util",
 					utilidade + " nao esta cadastrado na coluna utilidade da tabela Util");
 		}
 	}
@@ -123,6 +124,26 @@ public class UtilService {
 
 	public Optional<Util> findByEmpresaAndUtilidade(Empresa empresa, String utilidade) {
 		return utilRepository.findByEmpresaAndUtilidade(empresa, utilidade);
+	}
+	
+	public List<Util> getPastasImportacaoXML(String utilidade) throws CupomFiscalXMLException, UtilServiceException {
+		List<Util> util = utilRepository.findByUtilidade(utilidade);
+		if (util.isEmpty()) {
+			throw new UtilServiceException(utilidade + " nao esta cadastrado na coluna utilidade da tabela Util",
+					utilidade + " nao esta cadastrado na coluna utilidade da tabela Util");
+		} else {
+			return util;
+		}
+	}
+
+	public Util getPastaUtilidadeXML(Empresa empresa, String utilidade) throws CupomFiscalXMLException {
+		Optional<Util> pasta = utilRepository.findByEmpresaAndUtilidade(empresa, utilidade);
+		if (pasta.isEmpty()) {
+			throw new CupomFiscalXMLException(utilidade + " nao esta cadastrado na coluna utilidade da tabela Util",
+					utilidade + " nao esta cadastrado na coluna utilidade da tabela Util");
+		} else {
+			return pasta.get();
+		}
 	}
 
 }

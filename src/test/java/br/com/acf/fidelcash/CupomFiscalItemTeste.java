@@ -27,10 +27,10 @@ public class CupomFiscalItemTeste {
 	
 	@Test
 	public void extratoClienteTeste() {
-		List<CupomFiscalItem> cfItens = cfItemService.findByClienteOrderByCupomFiscalDataCompra(47);
-		assertTrue(cfItens.size() > 0); 
-		List<CupomFiscalItemExtratoDto> extrato = cfItemService.geraExtrato(cfItens);
-		System.out.println(extrato.get(1).getSaldoLancamento());
+		//List<CupomFiscalItem> cfItens = cfItemService.findByClienteOrderByCupomFiscalDataCompra(47);
+		//assertTrue(cfItens.size() > 0); 
+		//List<CupomFiscalItemExtratoDto> extrato = cfItemService.geraExtrato(cfItens);
+		//System.out.println(extrato.get(1).getSaldoLancamento());
 		System.out.println(CupomFiscalItemExtratoDto.getSaldoGeral());
 		assertEquals(-5.7, CupomFiscalItemExtratoDto.getSaldoGeral(), 0.0001);
 	}

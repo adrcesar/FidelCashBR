@@ -19,6 +19,7 @@ import br.com.acf.fidelcash.controller.dto.ImportacaoDto;
 import br.com.acf.fidelcash.controller.dto.UtilDtoImplantacao;
 import br.com.acf.fidelcash.controller.service.CupomFiscalXMLImplantacaoService;
 import br.com.acf.fidelcash.controller.service.CupomFiscalXMLImportacaoService;
+import br.com.acf.fidelcash.controller.service.exception.UtilServiceException;
 import br.com.acf.fidelcash.modelo.exception.CupomFiscalXMLException;
 
 @RestController
@@ -55,11 +56,11 @@ public class CupomFiscalXMLController {
 			List<ImportacaoDto> importacao =  cfImporta.importarXml();
 			return ResponseEntity.ok(importacao);
 		} catch (IOException | ParserConfigurationException | SAXException | ParseException
-				| CupomFiscalXMLException e) {
+				| CupomFiscalXMLException | UtilServiceException e) {
 			List<ImportacaoDto >importacaoErro = new ArrayList<ImportacaoDto>();
 			importacaoErro.get(0).setErro("Erro ao importar arquivos XML.");
 			return ResponseEntity.badRequest().body(importacaoErro);
-		}
+		} 
 	}
 	
 	
