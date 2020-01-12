@@ -78,4 +78,14 @@ public class ContaCorrenteService {
 		}
 	}
 
+	public float getSaldoCliente(Cliente cliente) {
+		List<ContaCorrente> cc = new ArrayList<ContaCorrente>();
+		cc = ccRepository.findFirstByClienteOrderByIdDesc(cliente);
+		float saldo = 0;
+		if (!cc.isEmpty()) {
+			saldo = cc.get(0).getSaldo();
+		}
+		return saldo;
+	}
+
 }

@@ -1,5 +1,6 @@
 package br.com.acf.fidelcash.controller.service;
 
+import java.math.BigInteger;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,11 @@ public class ClienteService {
             throw new ClienteServiceException("Erro no cadastro de cliente", "Erro no cadastro de cliente");
         }
     }
+
+	public Optional<Cliente> findByCpf(BigInteger cpf) {
+		return clienteRepository.findByCpf(cpf);
+		 
+	}
 	
 	
 

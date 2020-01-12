@@ -65,4 +65,9 @@ public class EmpresaService {
         }
 		
 	}
+
+	public void save(Empresa empresa) {
+		empresaRepository.save(empresa);
+		
+	}
 }

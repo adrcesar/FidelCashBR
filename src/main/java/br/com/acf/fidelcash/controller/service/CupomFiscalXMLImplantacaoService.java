@@ -94,11 +94,11 @@ public class CupomFiscalXMLImplantacaoService {
 		posicao = posicao + tamanho;
 		String pastaImplantacao = pasta.substring(0, posicao);
 		
-		criarDiretorioImplantacaoImportados(pastaImplantacao, empresa);
+		criarDiretorioImplantacaoImportados(pastaImplantacao, empresa.getCnpj().toString());
 	}
 
-	private void criarDiretorioImplantacaoImportados(String pastaImplantacao, Empresa empresa) throws CupomFiscalXMLException {
-		String utilidade = empresa + "_implantados_xml";
+	private void criarDiretorioImplantacaoImportados(String pastaImplantacao, String cnpj) throws CupomFiscalXMLException {
+		String utilidade = cnpj.toString() + "_implantados_xml";
 		String pastaImplantacaoImportados = pastaImplantacao + "\\importados\\";
 		Path pastaImportados = FileSystems.getDefault().getPath(pastaImplantacaoImportados);
 		criarDiretorio(pastaImplantacaoImportados, pastaImportados);
@@ -203,7 +203,6 @@ public class CupomFiscalXMLImplantacaoService {
 			throws CupomFiscalXMLException, EmpresaServiceException, TipoClienteServiceException, ProdutoServiceException {
 		try {
 			String xml = arquivo.toString();
-
 			CupomFiscalXML cfXML = new CupomFiscalXML(xml);
 			Empresa empresaXML = cfXML.getEmpresa();
 			List<Produto> produtos = cfXML.getProdutos();

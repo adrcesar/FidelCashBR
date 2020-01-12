@@ -11,6 +11,10 @@ import br.com.acf.fidelcash.modelo.TipoCliente;
 public interface ClienteRepository extends JpaRepository<Cliente, Integer> {
 
 	Optional<Cliente> findByTipoClienteAndCpf(TipoCliente tipoCliente, BigInteger cpf);
+
+	Optional<Cliente> findByCpf(BigInteger cpf);
+
+	
 	
 
 }

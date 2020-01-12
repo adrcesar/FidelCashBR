@@ -21,4 +21,7 @@ public interface ContaCorrenteRepository extends JpaRepository<ContaCorrente, Bi
 	List<ContaCorrente> findByEmpresaAndClienteAndDataCompraSuperiorQueAtual(Empresa empresa, Cliente cliente,
 			LocalDateTime dataCompra);
 
+	@Query("SELECT c FROM ContaCorrente c WHERE c.cupomFiscalItem.cupomFiscal.cliente = :cliente ORDER BY c.id DESC")
+	List<ContaCorrente> findFirstByClienteOrderByIdDesc(Cliente cliente);
+
 }
