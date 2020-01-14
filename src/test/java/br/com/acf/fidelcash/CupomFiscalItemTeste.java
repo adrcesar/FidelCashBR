@@ -16,7 +16,7 @@ import java.util.Optional;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,14 +44,16 @@ import br.com.acf.fidelcash.modelo.exception.CupomFiscalXMLException;
 @WebAppConfiguration
 public class CupomFiscalItemTeste {
 
-	@Autowired
-	private static CupomFiscalXMLImplantacaoService cfImplementa;
+	public static boolean testeConfigurado = false;
 
 	@Autowired
-	private static CupomFiscalXMLImportacaoService cfImporta;
+	private CupomFiscalXMLImplantacaoService cfImplementa;
 
 	@Autowired
-	private static EmpresaService empresaService;
+	private CupomFiscalXMLImportacaoService cfImporta;
+
+	@Autowired
+	private EmpresaService empresaService;
 
 	@Autowired
 	private ContaCorrenteService ccService;
@@ -59,48 +61,55 @@ public class CupomFiscalItemTeste {
 	@Autowired
 	private ClienteService clienteService;
 
-	@BeforeClass
-	public static void setup() throws IOException, CupomFiscalXMLException, EmpresaServiceException,
-			UtilServiceException, ParserConfigurationException, SAXException, ParseException {
+	@BeforeEach
+	public void setup() throws IOException, CupomFiscalXMLException, EmpresaServiceException, UtilServiceException,
+			ParserConfigurationException, SAXException, ParseException {
 
-		// move arquivos para a pasta de de upload da implantacao
-		Path dir = Paths.get("C:\\Projetos\\fidelcash\\arquivos_xml\\99999999999999\\implantacao");
-		DirectoryStream<Path> directoryStream = Files.newDirectoryStream(dir, "*.xml*");
-		String diretorioDestino = "C:\\Projetos\\fidelcash\\arquivos_xml\\99999999999999\\implantacao\\upload";
-		for (Path arquivoOrigem : directoryStream) {
-			String stringArquivoDestino = diretorioDestino + "\\" + arquivoOrigem.getFileName();
-			Path arquivoDestino = FileSystems.getDefault().getPath(stringArquivoDestino);
-			Files.copy(arquivoOrigem, arquivoDestino, StandardCopyOption.REPLACE_EXISTING);
+		if (!testeConfigurado) {
+			// move arquivos para a pasta de de upload da implantacao
 
+			Path dir = Paths.get("C:\\Projetos\\fidelcash\\arquivos_xml\\99999999999999\\implantacao");
+			DirectoryStream<Path> directoryStream = Files.newDirectoryStream(dir, "*.xml*");
+			String diretorioDestino = "C:\\Projetos\\fidelcash\\arquivos_xml\\99999999999999\\implantacao\\upload";
+			for (Path arquivoOrigem : directoryStream) {
+				String stringArquivoDestino = diretorioDestino + "\\" + arquivoOrigem.getFileName();
+				Path arquivoDestino = FileSystems.getDefault().getPath(stringArquivoDestino);
+				Files.copy(arquivoOrigem, arquivoDestino, StandardCopyOption.REPLACE_EXISTING);
+
+			}
+			// implantar
+			BigInteger cnpj = new BigInteger("99999999999999");
+			@SuppressWarnings("unused")
+			UtilDtoImplantacao utilDto = cfImplementa.implantarFidelCash(cnpj.toString());
+
+			// move arquivos para a pasta de de upload da importacao
+			dir = Paths.get("C:\\Projetos\\fidelcash\\arquivos_xml\\99999999999999\\importacao");
+			directoryStream = Files.newDirectoryStream(dir, "*.xml*");
+			diretorioDestino = "C:\\Projetos\\fidelcash\\arquivos_xml\\99999999999999\\importacao\\upload";
+			for (Path arquivoOrigem : directoryStream) {
+				String stringArquivoDestino = diretorioDestino + "\\" + arquivoOrigem.getFileName();
+				Path arquivoDestino = FileSystems.getDefault().getPath(stringArquivoDestino);
+				Files.copy(arquivoOrigem, arquivoDestino, StandardCopyOption.REPLACE_EXISTING);
+			}
+
+			Optional<Empresa> empresa = empresaService.findByCnpj(cnpj);
+			empresa.get().setSituacao(SituacaoEmpresa.ATIVA);
+
+			empresaService.save(empresa.get());
+
+			@SuppressWarnings("unused")
+			List<ImportacaoDto> importacao = cfImporta.importarXml();
+
+			testeConfigurado = true;
 		}
-		// implantar
-		BigInteger cnpj = new BigInteger("99999999999999");
-		@SuppressWarnings("unused")
-		UtilDtoImplantacao utilDto = cfImplementa.implantarFidelCash(cnpj.toString());
-
-		// move arquivos para a pasta de de upload da importacao
-		dir = Paths.get("C:\\Projetos\\fidelcash\\arquivos_xml\\99999999999999\\importacao");
-		directoryStream = Files.newDirectoryStream(dir, "*.xml*");
-		diretorioDestino = "C:\\Projetos\\fidelcash\\arquivos_xml\\99999999999999\\importacao\\upload";
-		for (Path arquivoOrigem : directoryStream) {
-			String stringArquivoDestino = diretorioDestino + "\\" + arquivoOrigem.getFileName();
-			Path arquivoDestino = FileSystems.getDefault().getPath(stringArquivoDestino);
-			Files.copy(arquivoOrigem, arquivoDestino, StandardCopyOption.REPLACE_EXISTING);
-		}
-
-		Optional<Empresa> empresa = empresaService.findByCnpj(cnpj);
-		empresa.get().setSituacao(SituacaoEmpresa.ATIVA);
-
-		empresaService.save(empresa.get());
-
-		@SuppressWarnings("unused")
-		List<ImportacaoDto> importacao = cfImporta.importarXml();
 
 	}
 
 	@Test
 	public void extratoClienteTeste() {
+
 		BigInteger cpf = new BigInteger("16368579811");
+
 		Optional<Cliente> cliente = clienteService.findByCpf(cpf);
 		float saldo = 0;
 
@@ -109,7 +118,7 @@ public class CupomFiscalItemTeste {
 		}
 
 		System.out.println(saldo);
-		assertEquals(-5.7, saldo, 0.0001);
+		assertEquals(-5.223, saldo, 0.0001);
 	}
 
 }

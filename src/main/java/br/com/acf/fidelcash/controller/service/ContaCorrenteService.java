@@ -29,7 +29,7 @@ public class ContaCorrenteService {
 			CupomFiscal cf = itens.get(i).getCupomFiscal();
 			Empresa empresa = itens.get(i).getCupomFiscal().getCliente().getTipoCliente().getEmpresa();
 			Cliente cliente = itens.get(i).getCupomFiscal().getCliente();
-			List<ContaCorrente> lancamentosPosteriores = LancamentosPosterioresAoAtual(empresa, cliente, cf);
+			List<ContaCorrente> lancamentosPosteriores = lancamentosPosterioresAoAtual(empresa, cliente, cf);
 			float saldo = 0;
 			if (lancamentosPosteriores.isEmpty()) {
 				saldo = getSaldoEmpresaCliente(empresa, cliente);
@@ -39,7 +39,7 @@ public class ContaCorrenteService {
 		}
 	}
 	
-	private List<ContaCorrente> LancamentosPosterioresAoAtual(Empresa empresa, Cliente cliente, CupomFiscal cf) {
+	private List<ContaCorrente> lancamentosPosterioresAoAtual(Empresa empresa, Cliente cliente, CupomFiscal cf) {
 		List<ContaCorrente> itens = ccRepository.findByEmpresaAndClienteAndDataCompraSuperiorQueAtual(empresa, cliente, cf.getDataCompra());
 		return itens;
 	}
@@ -58,21 +58,27 @@ public class ContaCorrenteService {
 		try {
 			ContaCorrente cc = new ContaCorrente();
 			cc.setCupomFiscalItem(cfItem);
+			TipoClienteLog log = tipoClienteLogService.bonusDoPeriodo(cfItem);
+			float bonusPercentual = log.getBonus();
+			float credito = ((cfItem.getValorItem() * bonusPercentual) / 100);
 			if (Float.compare(cfItem.getValorDesconto(), 0) == 0) {
 				cc.setDebito(0);
-				TipoClienteLog log = tipoClienteLogService.bonusDoPeriodo(cfItem);
-				float bonusPercentual = log.getBonus();
-				float credito = ((cfItem.getValorItem() * bonusPercentual) / 100);
-				cc.setTipoClienteLog(log);
+				credito = ((cfItem.getValorItem() * bonusPercentual) / 100);
 				cc.setCredito(credito);
 				cc.setSaldo(saldoAnterior + credito);
-				ccRepository.save(cc);
 			} else {
-				cc.setCredito(0);
+				float valorItemMenosCreditoUtilizado = cfItem.getValorItem() - cfItem.getValorDesconto();
+				if (valorItemMenosCreditoUtilizado <= 0) {
+					credito = 0;
+					cc.setCredito(credito);
+				} else {
+					credito = ((valorItemMenosCreditoUtilizado * bonusPercentual) / 100);
+					cc.setCredito(credito);
+				}
 				cc.setDebito(cfItem.getValorDesconto());
-				cc.setSaldo(saldoAnterior - cfItem.getValorDesconto());
-				ccRepository.save(cc);
+				cc.setSaldo(saldoAnterior + credito - cfItem.getValorDesconto());
 			}
+			ccRepository.save(cc);
 		} catch (TipoClienteLogServiceException e) {
 			throw new ContaCorrenteServiceException(e.getMensagem(), e.getMensagem());
 		}

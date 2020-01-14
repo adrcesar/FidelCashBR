@@ -23,10 +23,6 @@ public class ContaCorrente {
 	private float debito;
 	private float saldo;
 	
-	@JoinColumn(name = "id_tipo_cliente_log", referencedColumnName = "id")
-	@ManyToOne
-	private TipoClienteLog tipoClienteLog;
-	
 	public ContaCorrente() {
 		
 	}
@@ -100,13 +96,7 @@ public class ContaCorrente {
 		this.saldo = saldo;
 	}
 
-	public TipoClienteLog getTipoClienteLog() {
-		return tipoClienteLog;
-	}
-
-	public void setTipoClienteLog(TipoClienteLog tipoClienteLog) {
-		this.tipoClienteLog = tipoClienteLog;
-	}
+	
 	
 	
 
