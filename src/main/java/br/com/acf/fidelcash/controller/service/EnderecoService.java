@@ -20,4 +20,9 @@ public class EnderecoService {
 		return enderecoRepository.findByMaxId();
 	}
 
+	public void deleteAll() {
+		enderecoRepository.deleteAll();
+		
+	}
+
 }

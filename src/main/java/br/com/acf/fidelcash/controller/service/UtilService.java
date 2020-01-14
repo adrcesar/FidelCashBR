@@ -146,4 +146,13 @@ public class UtilService {
 		}
 	}
 
+	public void deleteByEmpresaIsNull() {
+		List<Util> utilidades = utilRepository.findByEmpresaIsNotNull();
+		for(int i=0; i < utilidades.size(); i++) {
+			utilRepository.delete(utilidades.get(i));
+		}
+		
+		
+	}
+
 }

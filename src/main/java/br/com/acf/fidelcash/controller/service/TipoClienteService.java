@@ -62,4 +62,9 @@ public class TipoClienteService {
         }
     }
 
+	public void deleteAll() {
+		tipoClienteRepository.deleteAll();
+		
+	}
+
 }

@@ -55,4 +55,9 @@ public class TipoClienteLogService {
 		}
 		return logBonus;
 	}
+
+	public void deleteAll() {
+		tipoClienteLogRepository.deleteAll();
+		
+	}
 }

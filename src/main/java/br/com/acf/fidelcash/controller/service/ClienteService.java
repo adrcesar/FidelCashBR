@@ -43,6 +43,11 @@ public class ClienteService {
 		return clienteRepository.findByCpf(cpf);
 		 
 	}
+
+	public void deleteAll() {
+		clienteRepository.deleteAll();
+		
+	}
 	
 	
 

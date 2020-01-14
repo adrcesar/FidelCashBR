@@ -10,5 +10,8 @@ delete from empresa;
 delete from grupo_empresarial;
 delete from endereco;
 commit;
---delete from util where id = 101
-select * from util;
+--
+select * from cupom_fiscal_item;
+
+
+

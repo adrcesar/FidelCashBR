@@ -60,29 +60,47 @@ public class ContaCorrenteService {
 			cc.setCupomFiscalItem(cfItem);
 			TipoClienteLog log = tipoClienteLogService.bonusDoPeriodo(cfItem);
 			float bonusPercentual = log.getBonus();
-			float credito = ((cfItem.getValorItem() * bonusPercentual) / 100);
 			if (Float.compare(cfItem.getValorDesconto(), 0) == 0) {
-				cc.setDebito(0);
-				credito = ((cfItem.getValorItem() * bonusPercentual) / 100);
-				cc.setCredito(credito);
-				cc.setSaldo(saldoAnterior + credito);
+				cc = setContaCorrenteBonus(cfItem, saldoAnterior, cc, bonusPercentual);
 			} else {
-				float valorItemMenosCreditoUtilizado = cfItem.getValorItem() - cfItem.getValorDesconto();
-				if (valorItemMenosCreditoUtilizado <= 0) {
-					credito = 0;
-					cc.setCredito(credito);
-				} else {
-					credito = ((valorItemMenosCreditoUtilizado * bonusPercentual) / 100);
-					cc.setCredito(credito);
-				}
-				cc.setDebito(cfItem.getValorDesconto());
-				cc.setSaldo(saldoAnterior + credito - cfItem.getValorDesconto());
+				setContaCorrenteResgateCashBack(cfItem, saldoAnterior, cc, bonusPercentual);
 			}
 			ccRepository.save(cc);
 		} catch (TipoClienteLogServiceException e) {
 			throw new ContaCorrenteServiceException(e.getMensagem(), e.getMensagem());
 		}
 	}
+
+	private float valorDoBonus(float valor, float percentual) {
+		return ((valor * percentual) / 100);
+	}
+	
+	private ContaCorrente setContaCorrenteBonus(CupomFiscalItem cfItem, float saldoAnterior, ContaCorrente cc,
+			float bonusPercentual) {
+		float credito;
+		cc.setDebito(0);
+		credito = valorDoBonus(cfItem.getValorItem(), bonusPercentual);
+		cc.setCredito(credito);
+		cc.setSaldo(saldoAnterior + credito);
+		return cc;
+	}
+	
+	private ContaCorrente setContaCorrenteResgateCashBack(CupomFiscalItem cfItem, float saldoAnterior, ContaCorrente cc,
+			float bonusPercentual) {
+		float credito;
+		float valorItemMenosCreditoUtilizado = cfItem.getValorItem() - cfItem.getValorDesconto();
+		if (valorItemMenosCreditoUtilizado <= 0) {
+			credito = 0;
+			cc.setCredito(credito);
+		} else {
+			credito = valorDoBonus(valorItemMenosCreditoUtilizado, bonusPercentual);
+			cc.setCredito(credito);
+		}
+		cc.setDebito(cfItem.getValorDesconto());
+		cc.setSaldo(saldoAnterior + credito - cfItem.getValorDesconto());
+		return cc;
+	}
+	
 
 	public float getSaldoCliente(Cliente cliente) {
 		List<ContaCorrente> cc = new ArrayList<ContaCorrente>();
@@ -92,6 +110,10 @@ public class ContaCorrenteService {
 			saldo = cc.get(0).getSaldo();
 		}
 		return saldo;
+	}
+
+	public void deleteAll() {
+		ccRepository.deleteAll();
 	}
 
 }

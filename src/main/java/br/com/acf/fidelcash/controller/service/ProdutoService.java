@@ -37,4 +37,9 @@ public class ProdutoService {
 	public List<Produto> findByEmpresa(Empresa empresa) {
 		return produtoRepository.findByEmpresa(empresa);
 	}
+
+	public void deleteAll() {
+		produtoRepository.deleteAll();
+		
+	}
 }

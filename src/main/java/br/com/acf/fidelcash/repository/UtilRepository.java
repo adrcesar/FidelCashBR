@@ -14,6 +14,8 @@ public interface UtilRepository extends JpaRepository<Util, Integer>{
 	Optional<Util> findByEmpresaAndUtilidade(Empresa empresa, String utilidade);
 	
 	List<Util> findByUtilidade(String utilidade);
+
+	List<Util> findByEmpresaIsNotNull();
 	
 	
 	

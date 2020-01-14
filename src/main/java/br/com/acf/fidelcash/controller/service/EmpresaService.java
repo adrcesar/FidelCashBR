@@ -70,4 +70,9 @@ public class EmpresaService {
 		empresaRepository.save(empresa);
 		
 	}
+
+	public void deleteAll() {
+		empresaRepository.deleteAll();
+		
+	}
 }

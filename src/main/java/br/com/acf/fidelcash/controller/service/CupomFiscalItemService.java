@@ -38,6 +38,11 @@ public class CupomFiscalItemService {
 			throw new CupomFiscalItemServiceException("Erro Item do Cupom Fiscal", "Erro Item do Cupom Fiscal");
 		}
 	}
+
+	public void deleteAll() {
+		cfItemRepository.deleteAll();
+		
+	}
 	
 	
 	

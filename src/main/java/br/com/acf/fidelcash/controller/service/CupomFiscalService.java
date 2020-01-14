@@ -32,4 +32,9 @@ public class CupomFiscalService {
 		}
 	}
 
+	public void deleteAll() {
+		cfRespository.deleteAll();
+		
+	}
+
 }

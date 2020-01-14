@@ -1,6 +1,8 @@
 package br.com.acf.fidelcash.modelo;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -10,6 +12,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+
+
 
 @Entity
 public class Empresa {
@@ -31,6 +36,9 @@ public class Empresa {
     @JoinColumn(name = "id_grupo_empresarial", referencedColumnName = "id")
     @ManyToOne
     private GrupoEmpresarial grupoEmpresarial;
+    
+    @OneToMany(mappedBy = "empresa")
+	private List<Util> utilidades = new ArrayList<>();
 
     public Empresa() {
     }
@@ -130,5 +138,15 @@ public class Empresa {
 	public static long getSerialversionuid() {
 		return serialVersionUID;
 	}
+
+	public List<Util> getUtilidades() {
+		return utilidades;
+	}
+
+	public void setUtilidades(List<Util> utilidades) {
+		this.utilidades = utilidades;
+	}
+	
+	
 
 }

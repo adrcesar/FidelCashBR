@@ -16,6 +16,7 @@ import java.util.Optional;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -29,9 +30,17 @@ import br.com.acf.fidelcash.controller.dto.ImportacaoDto;
 import br.com.acf.fidelcash.controller.dto.UtilDtoImplantacao;
 import br.com.acf.fidelcash.controller.service.ClienteService;
 import br.com.acf.fidelcash.controller.service.ContaCorrenteService;
+import br.com.acf.fidelcash.controller.service.CupomFiscalItemService;
+import br.com.acf.fidelcash.controller.service.CupomFiscalService;
 import br.com.acf.fidelcash.controller.service.CupomFiscalXMLImplantacaoService;
 import br.com.acf.fidelcash.controller.service.CupomFiscalXMLImportacaoService;
 import br.com.acf.fidelcash.controller.service.EmpresaService;
+import br.com.acf.fidelcash.controller.service.EnderecoService;
+import br.com.acf.fidelcash.controller.service.GrupoEmpresarialService;
+import br.com.acf.fidelcash.controller.service.ProdutoService;
+import br.com.acf.fidelcash.controller.service.TipoClienteLogService;
+import br.com.acf.fidelcash.controller.service.TipoClienteService;
+import br.com.acf.fidelcash.controller.service.UtilService;
 import br.com.acf.fidelcash.controller.service.exception.EmpresaServiceException;
 import br.com.acf.fidelcash.controller.service.exception.UtilServiceException;
 import br.com.acf.fidelcash.modelo.Cliente;
@@ -60,6 +69,31 @@ public class CupomFiscalItemTeste {
 
 	@Autowired
 	private ClienteService clienteService;
+	
+	@Autowired
+	private UtilService utilService;
+	
+	@Autowired
+	private CupomFiscalItemService cfItemService;
+	
+	@Autowired
+	private CupomFiscalService cfService;
+	
+	@Autowired
+	private TipoClienteLogService tipoClienteLogService;
+	
+	@Autowired
+	private TipoClienteService tipoClienteService;
+	
+	@Autowired
+	private ProdutoService produtoService;
+
+	@Autowired
+	private GrupoEmpresarialService grupoEmpresarialService;
+	
+	@Autowired
+	private EnderecoService enderecoService;
+	
 
 	@BeforeEach
 	public void setup() throws IOException, CupomFiscalXMLException, EmpresaServiceException, UtilServiceException,
@@ -68,9 +102,9 @@ public class CupomFiscalItemTeste {
 		if (!testeConfigurado) {
 			// move arquivos para a pasta de de upload da implantacao
 
-			Path dir = Paths.get("C:\\Projetos\\fidelcash\\arquivos_xml\\99999999999999\\implantacao");
+			Path dir = Paths.get("C:\\Projetos\\fidelcash\\arquivos-xml\\99999999999999\\implantacao");
 			DirectoryStream<Path> directoryStream = Files.newDirectoryStream(dir, "*.xml*");
-			String diretorioDestino = "C:\\Projetos\\fidelcash\\arquivos_xml\\99999999999999\\implantacao\\upload";
+			String diretorioDestino = "C:\\Projetos\\fidelcash\\arquivos-xml\\99999999999999\\implantacao\\upload";
 			for (Path arquivoOrigem : directoryStream) {
 				String stringArquivoDestino = diretorioDestino + "\\" + arquivoOrigem.getFileName();
 				Path arquivoDestino = FileSystems.getDefault().getPath(stringArquivoDestino);
@@ -83,9 +117,9 @@ public class CupomFiscalItemTeste {
 			UtilDtoImplantacao utilDto = cfImplementa.implantarFidelCash(cnpj.toString());
 
 			// move arquivos para a pasta de de upload da importacao
-			dir = Paths.get("C:\\Projetos\\fidelcash\\arquivos_xml\\99999999999999\\importacao");
+			dir = Paths.get("C:\\Projetos\\fidelcash\\arquivos-xml\\99999999999999\\importacao");
 			directoryStream = Files.newDirectoryStream(dir, "*.xml*");
-			diretorioDestino = "C:\\Projetos\\fidelcash\\arquivos_xml\\99999999999999\\importacao\\upload";
+			diretorioDestino = "C:\\Projetos\\fidelcash\\arquivos-xml\\99999999999999\\importacao\\upload";
 			for (Path arquivoOrigem : directoryStream) {
 				String stringArquivoDestino = diretorioDestino + "\\" + arquivoOrigem.getFileName();
 				Path arquivoDestino = FileSystems.getDefault().getPath(stringArquivoDestino);
@@ -104,6 +138,22 @@ public class CupomFiscalItemTeste {
 		}
 
 	}
+	
+	@AfterEach
+	public void LimparBaseDados() {
+		utilService.deleteByEmpresaIsNull();
+		ccService.deleteAll();
+		cfItemService.deleteAll();
+		cfService.deleteAll();
+		clienteService.deleteAll();
+		tipoClienteLogService.deleteAll();
+		tipoClienteService.deleteAll();
+		produtoService.deleteAll();
+		empresaService.deleteAll();
+		grupoEmpresarialService.deleteAll();
+		enderecoService.deleteAll();
+	}
+	
 
 	@Test
 	public void extratoClienteTeste() {
