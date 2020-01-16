@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,6 +30,7 @@ import org.xml.sax.SAXException;
 import br.com.acf.fidelcash.controller.dto.ImportacaoDto;
 import br.com.acf.fidelcash.controller.dto.UtilDtoImplantacao;
 import br.com.acf.fidelcash.controller.service.ClienteService;
+import br.com.acf.fidelcash.controller.service.ContaCorrenteService;
 import br.com.acf.fidelcash.controller.service.CupomFiscalItemService;
 import br.com.acf.fidelcash.controller.service.CupomFiscalService;
 import br.com.acf.fidelcash.controller.service.CupomFiscalXMLImplantacaoService;
@@ -43,6 +45,7 @@ import br.com.acf.fidelcash.controller.service.UtilService;
 import br.com.acf.fidelcash.controller.service.exception.EmpresaServiceException;
 import br.com.acf.fidelcash.controller.service.exception.UtilServiceException;
 import br.com.acf.fidelcash.modelo.Cliente;
+import br.com.acf.fidelcash.modelo.ContaCorrente;
 import br.com.acf.fidelcash.modelo.Empresa;
 import br.com.acf.fidelcash.modelo.SituacaoEmpresa;
 import br.com.acf.fidelcash.modelo.exception.CupomFiscalXMLException;
@@ -53,6 +56,7 @@ import br.com.acf.fidelcash.modelo.exception.CupomFiscalXMLException;
 public class CupomFiscalItemTeste {
 
 	public static boolean testeConfigurado = false;
+	public static int numeroDeTestes = 0;
 
 	@Autowired
 	private CupomFiscalXMLImplantacaoService cfImplementa;
@@ -92,6 +96,9 @@ public class CupomFiscalItemTeste {
 	@Autowired
 	private EnderecoService enderecoService;
 	
+	@Autowired
+	private ContaCorrenteService ccService;
+	
 
 	@BeforeEach
 	public void setup() throws IOException, CupomFiscalXMLException, EmpresaServiceException, UtilServiceException,
@@ -130,7 +137,8 @@ public class CupomFiscalItemTeste {
 			empresaService.save(empresa.get());
 
 			@SuppressWarnings("unused")
-			List<ImportacaoDto> importacao = cfImporta.importarXml();
+			List<ImportacaoDto> importacao = new ArrayList<ImportacaoDto>();
+			importacao = cfImporta.importarXml();
 
 			testeConfigurado = true;
 		}
@@ -139,25 +147,32 @@ public class CupomFiscalItemTeste {
 	
 	@AfterEach
 	public void LimparBaseDados() {
-		utilService.deleteByEmpresaIsNull();
-		cfItemService.deleteAll();
-		cfService.deleteAll();
-		clienteService.deleteAll();
-		tipoClienteLogService.deleteAll();
-		tipoClienteService.deleteAll();
-		produtoService.deleteAll();
-		empresaService.deleteAll();
-		grupoEmpresarialService.deleteAll();
-		enderecoService.deleteAll();
+		if(numeroDeTestes == 2) {
+			utilService.deleteByEmpresaIsNull();
+			cfItemService.deleteAll();
+			ccService.deleteAll();
+			cfService.deleteAll();
+			clienteService.deleteAll();
+			tipoClienteLogService.deleteAll();
+			tipoClienteService.deleteAll();
+			produtoService.deleteAll();
+			empresaService.deleteAll();
+			grupoEmpresarialService.deleteAll();
+			enderecoService.deleteAll();
+		}
 	}
 	
 
 	@Test
-	public void extratoClienteTeste() {
+	public void saldoUltimoLancamentoCupomFiscalItem() {
 
+		BigInteger cnpj = new BigInteger("99999999999999");
 		BigInteger cpf = new BigInteger("16368579811");
-
-		Optional<Cliente> cliente = clienteService.findByCpf(cpf);
+		
+		Optional<Empresa> empresa = empresaService.findByCnpj(cnpj);
+		Optional<Cliente> cliente = clienteService.findByEmpresaAndCpf(empresa.get(), cpf);
+		
+		
 		float saldo = 0;
 
 		if (cliente.isPresent()) {
@@ -166,6 +181,23 @@ public class CupomFiscalItemTeste {
 
 		System.out.println(saldo);
 		assertEquals(-5.223, saldo, 0.0001);
+		numeroDeTestes = numeroDeTestes + 1;
+	}
+	
+	@Test
+	public void SaldoContaCorrenteTeste() {
+
+		BigInteger cnpj = new BigInteger("99999999999999");
+		BigInteger cpf = new BigInteger("16368579811");
+		
+		Optional<Empresa> empresa = empresaService.findByCnpj(cnpj);
+		Optional<Cliente> cliente = clienteService.findByEmpresaAndCpf(empresa.get(), cpf);
+		
+		Optional<ContaCorrente> cc = ccService.findByCliente(cliente.get());
+		
+		System.out.println(cc.get().getSaldo());
+		assertEquals(-5.223, cc.get().getSaldo(), 0.0001);
+		numeroDeTestes = numeroDeTestes + 1;
 	}
 
 }

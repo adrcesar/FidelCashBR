@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import br.com.acf.fidelcash.controller.service.exception.ClienteServiceException;
 import br.com.acf.fidelcash.modelo.Cliente;
+import br.com.acf.fidelcash.modelo.Empresa;
 import br.com.acf.fidelcash.modelo.TipoCliente;
 import br.com.acf.fidelcash.modelo.exception.CupomFiscalXMLException;
 import br.com.acf.fidelcash.repository.ClienteRepository;
@@ -47,6 +48,10 @@ public class ClienteService {
 	public void deleteAll() {
 		clienteRepository.deleteAll();
 		
+	}
+
+	public Optional<Cliente> findByEmpresaAndCpf(Empresa empresa, BigInteger cpf) {
+		return clienteRepository.findByTipoClienteEmpresaAndCpf(empresa, cpf);
 	}
 	
 	

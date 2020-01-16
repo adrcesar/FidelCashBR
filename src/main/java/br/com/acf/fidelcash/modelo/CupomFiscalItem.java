@@ -35,6 +35,10 @@ public class CupomFiscalItem {
     @JoinColumn(name = "id_produto", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private Produto produto;
+    
+    @JoinColumn(name = "id_conta_corrente", referencedColumnName = "id")
+    @ManyToOne(optional = false)
+    private ContaCorrente contaCorrente;
 
 	public CupomFiscalItem() {
 		
@@ -143,12 +147,14 @@ public class CupomFiscalItem {
 		this.credito = credito;
 	}
 
-	
-	
-	
-	
-	
-    
-    
+	public ContaCorrente getContaCorrente() {
+		return contaCorrente;
+	}
+
+	public void setContaCorrente(ContaCorrente contaCorrente) {
+		this.contaCorrente = contaCorrente;
+	}
+
+	    
 
 }

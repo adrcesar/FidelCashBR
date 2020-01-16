@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import br.com.acf.fidelcash.controller.service.exception.CupomFiscalItemServiceException;
 import br.com.acf.fidelcash.controller.service.exception.TipoClienteLogServiceException;
 import br.com.acf.fidelcash.modelo.Cliente;
-
+import br.com.acf.fidelcash.modelo.ContaCorrente;
 import br.com.acf.fidelcash.modelo.CupomFiscal;
 import br.com.acf.fidelcash.modelo.CupomFiscalItem;
 import br.com.acf.fidelcash.modelo.Empresa;
@@ -28,14 +28,18 @@ public class CupomFiscalItemService {
 	
 	@Autowired
 	private TipoClienteLogService tipoClienteLogService;
+	
+	@Autowired
+	private ContaCorrenteService ccService;
 
-	public void setCupomFiscalItem(List<Produto> produtos, List<CupomFiscalItem> itens, CupomFiscal cupomFiscal) throws CupomFiscalItemServiceException {
+	public void setCupomFiscalItem(List<Produto> produtos, List<CupomFiscalItem> itens, CupomFiscal cupomFiscal, ContaCorrente cc) throws CupomFiscalItemServiceException {
 		try {
 			for (int i = 0; i < produtos.size(); i++) {
 				Produto prod = produtoService.setProduto(produtos.get(i), cupomFiscal.getCliente().getTipoCliente().getEmpresa());
 				CupomFiscalItem cupomFiscalItem = itens.get(i);
 				cupomFiscalItem.setCupomFiscal(cupomFiscal);
 				cupomFiscalItem.setProduto(prod);
+				cupomFiscalItem.setContaCorrente(cc);
 				
 				List<CupomFiscalItem> lancamentosFuturos = new ArrayList<CupomFiscalItem>();
 				lancamentosFuturos = cfItemRepository.findByEmpresaClienteDataCompraSuperiorAAtual(prod.getEmpresa(), cupomFiscal.getCliente(), cupomFiscal.getDataCompra());
@@ -44,35 +48,32 @@ public class CupomFiscalItemService {
 					saldo = getSaldoEmpresaCliente(prod.getEmpresa(), cupomFiscal.getCliente());
 					cupomFiscalItem = setBonusOuCashBack(cupomFiscalItem, saldo);
 					cfItemRepository.save(cupomFiscalItem);
+					setSaldoContaCorrente(cc, cupomFiscalItem.getSaldo());
 				} else {
 					for(CupomFiscalItem itemFuturoExcluido : lancamentosFuturos) {
 						cfItemRepository.delete(itemFuturoExcluido);
 					}
-					
 					saldo = getSaldoEmpresaCliente(prod.getEmpresa(), cupomFiscal.getCliente());
 					cupomFiscalItem = setBonusOuCashBack(cupomFiscalItem, saldo);
 					cfItemRepository.save(cupomFiscalItem);
-					
+					setSaldoContaCorrente(cc, cupomFiscalItem.getSaldo());
 					for(CupomFiscalItem itemFuturoReincluido : lancamentosFuturos) {
 						saldo = getSaldoEmpresaCliente(prod.getEmpresa(), cupomFiscal.getCliente());
 						itemFuturoReincluido = setBonusOuCashBack(itemFuturoReincluido, saldo);
 						cfItemRepository.save(itemFuturoReincluido);
+						setSaldoContaCorrente(cc, itemFuturoReincluido.getSaldo());
 					}
 				}
-				
-				
-				
-				
-				
-				
-				
-				
-				
 			}
 			
 		} catch (Exception  e) {
 			throw new CupomFiscalItemServiceException("Erro Item do Cupom Fiscal", "Erro Item do Cupom Fiscal");
 		}
+	}
+
+	private void setSaldoContaCorrente(ContaCorrente cc, float saldo) {
+		cc.setSaldo(saldo);
+		ccService.setContaCorrente(cc);
 	}
 	
 	private CupomFiscalItem setBonusOuCashBack(CupomFiscalItem cfItem, float saldoAnterior) throws TipoClienteLogServiceException {

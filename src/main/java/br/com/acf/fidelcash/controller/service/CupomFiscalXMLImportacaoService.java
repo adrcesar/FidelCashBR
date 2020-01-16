@@ -31,6 +31,7 @@ import br.com.acf.fidelcash.controller.service.exception.EmpresaServiceException
 import br.com.acf.fidelcash.controller.service.exception.TipoClienteServiceException;
 import br.com.acf.fidelcash.controller.service.exception.UtilServiceException;
 import br.com.acf.fidelcash.modelo.Cliente;
+import br.com.acf.fidelcash.modelo.ContaCorrente;
 import br.com.acf.fidelcash.modelo.CupomFiscal;
 import br.com.acf.fidelcash.modelo.CupomFiscalItem;
 import br.com.acf.fidelcash.modelo.CupomFiscalXML;
@@ -60,6 +61,9 @@ public class CupomFiscalXMLImportacaoService {
 
 	@Autowired
 	private CupomFiscalItemService cfItemService;
+	
+	@Autowired
+	private ContaCorrenteService ccService;
 
 	
 
@@ -199,8 +203,9 @@ public class CupomFiscalXMLImportacaoService {
 			Empresa emp = empresaService.validaImportacaoEmpresa(empresaXML, empresaUtil);
 			TipoCliente tipoCliente = tipoClienteService.validaImportacaoTipoCliente(emp, "PADRAO");
 			cliente = clienteService.validaImportacaoCliente(cliente, tipoCliente);
+			ContaCorrente cc = ccService.setContaCorrente(cliente);
 			cupomFiscal = cfService.setCupomFiscal(cupomFiscal, cliente);
-			cfItemService.setCupomFiscalItem(produtos, itens, cupomFiscal);
+			cfItemService.setCupomFiscalItem(produtos, itens, cupomFiscal, cc);
 			//ccService.setContaCorrente(itens);
 
 		} catch (IOException | ParseException | ParserConfigurationException | SAXException e) {
