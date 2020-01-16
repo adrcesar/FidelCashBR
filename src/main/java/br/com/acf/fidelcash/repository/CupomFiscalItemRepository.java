@@ -1,6 +1,7 @@
 package br.com.acf.fidelcash.repository;
 
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -24,6 +25,9 @@ public interface CupomFiscalItemRepository extends JpaRepository<CupomFiscalItem
 
 	@Query("SELECT c FROM CupomFiscalItem c WHERE c.cupomFiscal.cliente = :cliente ORDER BY c.id DESC")
 	List<CupomFiscalItem> findFirstByClienteOrderByIdDesc(Cliente cliente);
+
+	@Query("SELECT c FROM CupomFiscalItem c WHERE c.cupomFiscal.cliente.tipoCliente.empresa = :empresa AND c.cupomFiscal.cliente = :cliente AND c.cupomFiscal.dataCompra > :dataCompra ORDER BY c.id")
+	List<CupomFiscalItem> findByEmpresaClienteDataCompraSuperiorAAtual(Empresa empresa, Cliente cliente, LocalDateTime dataCompra);
 	
 
 }

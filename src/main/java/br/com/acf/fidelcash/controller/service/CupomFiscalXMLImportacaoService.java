@@ -200,7 +200,7 @@ public class CupomFiscalXMLImportacaoService {
 			TipoCliente tipoCliente = tipoClienteService.validaImportacaoTipoCliente(emp, "PADRAO");
 			cliente = clienteService.validaImportacaoCliente(cliente, tipoCliente);
 			cupomFiscal = cfService.setCupomFiscal(cupomFiscal, cliente);
-			itens = cfItemService.setCupomFiscalItem(produtos, itens, cupomFiscal);
+			cfItemService.setCupomFiscalItem(produtos, itens, cupomFiscal);
 			//ccService.setContaCorrente(itens);
 
 		} catch (IOException | ParseException | ParserConfigurationException | SAXException e) {

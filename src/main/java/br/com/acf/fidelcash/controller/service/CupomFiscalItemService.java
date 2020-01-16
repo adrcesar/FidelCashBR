@@ -29,27 +29,47 @@ public class CupomFiscalItemService {
 	@Autowired
 	private TipoClienteLogService tipoClienteLogService;
 
-	public List<CupomFiscalItem> setCupomFiscalItem(List<Produto> produtos, List<CupomFiscalItem> itens, CupomFiscal cupomFiscal) throws CupomFiscalItemServiceException {
+	public void setCupomFiscalItem(List<Produto> produtos, List<CupomFiscalItem> itens, CupomFiscal cupomFiscal) throws CupomFiscalItemServiceException {
 		try {
-			List<CupomFiscalItem> cfItens =  new ArrayList<CupomFiscalItem>();
 			for (int i = 0; i < produtos.size(); i++) {
 				Produto prod = produtoService.setProduto(produtos.get(i), cupomFiscal.getCliente().getTipoCliente().getEmpresa());
-				CupomFiscalItem cupomFiscalItem;
-				cupomFiscalItem = itens.get(i);
+				CupomFiscalItem cupomFiscalItem = itens.get(i);
 				cupomFiscalItem.setCupomFiscal(cupomFiscal);
 				cupomFiscalItem.setProduto(prod);
-				// inicio mudanca
+				
+				List<CupomFiscalItem> lancamentosFuturos = new ArrayList<CupomFiscalItem>();
+				lancamentosFuturos = cfItemRepository.findByEmpresaClienteDataCompraSuperiorAAtual(prod.getEmpresa(), cupomFiscal.getCliente(), cupomFiscal.getDataCompra());
 				float saldo = 0;
-				saldo = getSaldoEmpresaCliente(prod.getEmpresa(), cupomFiscal.getCliente());
-				cupomFiscalItem = setBonusOuCashBack(cupomFiscalItem, saldo);
+				if(lancamentosFuturos.isEmpty()) {
+					saldo = getSaldoEmpresaCliente(prod.getEmpresa(), cupomFiscal.getCliente());
+					cupomFiscalItem = setBonusOuCashBack(cupomFiscalItem, saldo);
+					cfItemRepository.save(cupomFiscalItem);
+				} else {
+					for(CupomFiscalItem itemFuturoExcluido : lancamentosFuturos) {
+						cfItemRepository.delete(itemFuturoExcluido);
+					}
+					
+					saldo = getSaldoEmpresaCliente(prod.getEmpresa(), cupomFiscal.getCliente());
+					cupomFiscalItem = setBonusOuCashBack(cupomFiscalItem, saldo);
+					cfItemRepository.save(cupomFiscalItem);
+					
+					for(CupomFiscalItem itemFuturoReincluido : lancamentosFuturos) {
+						saldo = getSaldoEmpresaCliente(prod.getEmpresa(), cupomFiscal.getCliente());
+						itemFuturoReincluido = setBonusOuCashBack(itemFuturoReincluido, saldo);
+						cfItemRepository.save(itemFuturoReincluido);
+					}
+				}
 				
 				
 				
-				// fim mudanca
-				cfItemRepository.save(cupomFiscalItem);
-				cfItens.add(cupomFiscalItem);
+				
+				
+				
+				
+				
+				
 			}
-			return cfItens;
+			
 		} catch (Exception  e) {
 			throw new CupomFiscalItemServiceException("Erro Item do Cupom Fiscal", "Erro Item do Cupom Fiscal");
 		}
