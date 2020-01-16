@@ -61,8 +61,7 @@ public class CupomFiscalXMLImportacaoService {
 	@Autowired
 	private CupomFiscalItemService cfItemService;
 
-	@Autowired
-	private ContaCorrenteService ccService;
+	
 
 	@Transactional(rollbackFor = { Exception.class })
 	public List<ImportacaoDto> importarXml() throws IOException, ParserConfigurationException, SAXException,
@@ -202,7 +201,7 @@ public class CupomFiscalXMLImportacaoService {
 			cliente = clienteService.validaImportacaoCliente(cliente, tipoCliente);
 			cupomFiscal = cfService.setCupomFiscal(cupomFiscal, cliente);
 			itens = cfItemService.setCupomFiscalItem(produtos, itens, cupomFiscal);
-			ccService.setContaCorrente(itens);
+			//ccService.setContaCorrente(itens);
 
 		} catch (IOException | ParseException | ParserConfigurationException | SAXException e) {
 			throw new CupomFiscalXMLException("Arquivo inconsistente", "Arquivo inconsistente");
@@ -216,8 +215,8 @@ public class CupomFiscalXMLImportacaoService {
 			throw new CupomFiscalXMLException(e.getMensagem(), e.getMensagem());
 		} catch (CupomFiscalItemServiceException e) {
 			throw new CupomFiscalXMLException(e.getMensagem(), e.getMensagem());
-		} catch (ContaCorrenteServiceException e) {
-			throw new CupomFiscalXMLException(e.getMensagem(), e.getMensagem());
-		}
+		} //catch (ContaCorrenteServiceException e) {
+			//throw new CupomFiscalXMLException(e.getMensagem(), e.getMensagem());
+		//}
 	}
 }

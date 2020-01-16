@@ -24,6 +24,10 @@ public class CupomFiscalItem {
     
     private float valorItem;
     
+    private float credito;
+    
+    private float saldo;
+    
     @JoinColumn(name = "id_cupom_fiscal", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private CupomFiscal cupomFiscal;
@@ -122,6 +126,25 @@ public class CupomFiscalItem {
 	public void setProduto(Produto produto) {
 		this.produto = produto;
 	}
+
+	public float getSaldo() {
+		return saldo;
+	}
+
+	public void setSaldo(float saldo) {
+		this.saldo = saldo;
+	}
+
+	public float getCredito() {
+		return credito;
+	}
+
+	public void setCredito(float credito) {
+		this.credito = credito;
+	}
+
+	
+	
 	
 	
 	

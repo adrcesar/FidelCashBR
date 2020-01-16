@@ -29,7 +29,6 @@ import org.xml.sax.SAXException;
 import br.com.acf.fidelcash.controller.dto.ImportacaoDto;
 import br.com.acf.fidelcash.controller.dto.UtilDtoImplantacao;
 import br.com.acf.fidelcash.controller.service.ClienteService;
-import br.com.acf.fidelcash.controller.service.ContaCorrenteService;
 import br.com.acf.fidelcash.controller.service.CupomFiscalItemService;
 import br.com.acf.fidelcash.controller.service.CupomFiscalService;
 import br.com.acf.fidelcash.controller.service.CupomFiscalXMLImplantacaoService;
@@ -64,8 +63,7 @@ public class CupomFiscalItemTeste {
 	@Autowired
 	private EmpresaService empresaService;
 
-	@Autowired
-	private ContaCorrenteService ccService;
+	
 
 	@Autowired
 	private ClienteService clienteService;
@@ -142,7 +140,6 @@ public class CupomFiscalItemTeste {
 	@AfterEach
 	public void LimparBaseDados() {
 		utilService.deleteByEmpresaIsNull();
-		ccService.deleteAll();
 		cfItemService.deleteAll();
 		cfService.deleteAll();
 		clienteService.deleteAll();
@@ -164,8 +161,8 @@ public class CupomFiscalItemTeste {
 		float saldo = 0;
 
 		if (cliente.isPresent()) {
-			saldo = ccService.getSaldoCliente(cliente.get());
-		}
+			saldo = cfItemService.getSaldoCliente(cliente.get());
+		} 
 
 		System.out.println(saldo);
 		assertEquals(-5.223, saldo, 0.0001);
