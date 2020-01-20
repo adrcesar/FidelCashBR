@@ -78,34 +78,35 @@ public class CupomFiscalItemService {
 	
 	private CupomFiscalItem setBonusOuCashBack(CupomFiscalItem cfItem, float saldoAnterior) throws TipoClienteLogServiceException {
 		TipoClienteLog log = tipoClienteLogService.bonusDoPeriodo(cfItem);
-		float bonusPercentual = log.getBonus();
 		if (Float.compare(cfItem.getValorDesconto(), 0) == 0) {
-			cfItem = setContaCorrenteBonus(cfItem, saldoAnterior, bonusPercentual);
+			cfItem = setContaCorrenteBonus(cfItem, saldoAnterior, log);
 		} else {
-			cfItem = setContaCorrenteResgateCashBack(cfItem, saldoAnterior, bonusPercentual);
+			cfItem = setContaCorrenteResgateCashBack(cfItem, saldoAnterior, log);
 		}
 		return cfItem;
 	}
 	
-	private CupomFiscalItem setContaCorrenteResgateCashBack(CupomFiscalItem cfItem, float saldoAnterior, float bonusPercentual) {
+	private CupomFiscalItem setContaCorrenteResgateCashBack(CupomFiscalItem cfItem, float saldoAnterior, TipoClienteLog log) {
 		float credito;
 		float valorItemMenosCreditoUtilizado = cfItem.getValorItem() - cfItem.getValorDesconto();
 		if (valorItemMenosCreditoUtilizado <= 0) {
 			credito = 0;
 			cfItem.setCredito(credito);
 		} else {
-			credito = valorDoBonus(valorItemMenosCreditoUtilizado, bonusPercentual);
+			credito = valorDoBonus(valorItemMenosCreditoUtilizado, log.getBonus());
 			cfItem.setCredito(credito);
 		}
 		cfItem.setSaldo(saldoAnterior + credito - cfItem.getValorDesconto());
+		cfItem.setTipoClienteLog(log);
 		return cfItem;
 	}
 	
-	private CupomFiscalItem setContaCorrenteBonus(CupomFiscalItem cfItem, float saldoAnterior, float bonusPercentual) {
+	private CupomFiscalItem setContaCorrenteBonus(CupomFiscalItem cfItem, float saldoAnterior, TipoClienteLog log) {
 		float credito;
-		credito = valorDoBonus(cfItem.getValorItem(), bonusPercentual);
+		credito = valorDoBonus(cfItem.getValorItem(), log.getBonus());
 		cfItem.setCredito(credito);
 		cfItem.setSaldo(saldoAnterior + credito);
+		cfItem.setTipoClienteLog(log);
 		return cfItem;
 	}
 	

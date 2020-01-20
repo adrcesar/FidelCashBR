@@ -39,6 +39,10 @@ public class CupomFiscalItem {
     @JoinColumn(name = "id_conta_corrente", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private ContaCorrente contaCorrente;
+    
+    @JoinColumn(name = "id_tipo_cliente_log", referencedColumnName = "id")
+    @ManyToOne(optional = true)
+    private TipoClienteLog tipoClienteLog;
 
 	public CupomFiscalItem() {
 		
@@ -154,6 +158,16 @@ public class CupomFiscalItem {
 	public void setContaCorrente(ContaCorrente contaCorrente) {
 		this.contaCorrente = contaCorrente;
 	}
+
+	public TipoClienteLog getTipoClienteLog() {
+		return tipoClienteLog;
+	}
+
+	public void setTipoClienteLog(TipoClienteLog tipoClienteLog) {
+		this.tipoClienteLog = tipoClienteLog;
+	}
+
+	
 
 	    
 

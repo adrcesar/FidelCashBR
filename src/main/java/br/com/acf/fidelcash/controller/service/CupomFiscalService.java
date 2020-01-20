@@ -1,5 +1,7 @@
 package br.com.acf.fidelcash.controller.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +37,16 @@ public class CupomFiscalService {
 	public void deleteAll() {
 		cfRespository.deleteAll();
 		
+	}
+
+	public List<CupomFiscal> findByDataCompraBetween(LocalDateTime dataInicio, LocalDateTime dataFinal) {
+		List<CupomFiscal> cupomFiscais = cfRespository.findByDataCompraBetween(dataInicio, dataFinal);
+		return cupomFiscais;
+	}
+
+	public List<CupomFiscal> findByDataCompraBetweenNotIn(LocalDateTime dataInicio, LocalDateTime dataFinal, List<Cliente> clientes) {
+		List<CupomFiscal> cupomFiscais = cfRespository.findByDataCompraBetweenNotIn(dataInicio, dataFinal, clientes);
+		return cupomFiscais;
 	}
 
 }

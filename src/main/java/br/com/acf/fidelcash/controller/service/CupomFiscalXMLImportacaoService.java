@@ -206,7 +206,7 @@ public class CupomFiscalXMLImportacaoService {
 			ContaCorrente cc = ccService.setContaCorrente(cliente);
 			cupomFiscal = cfService.setCupomFiscal(cupomFiscal, cliente);
 			cfItemService.setCupomFiscalItem(produtos, itens, cupomFiscal, cc);
-			//ccService.setContaCorrente(itens);
+			
 
 		} catch (IOException | ParseException | ParserConfigurationException | SAXException e) {
 			throw new CupomFiscalXMLException("Arquivo inconsistente", "Arquivo inconsistente");
