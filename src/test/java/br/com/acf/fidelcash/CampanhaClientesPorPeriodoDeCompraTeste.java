@@ -13,14 +13,11 @@ import java.nio.file.StandardCopyOption;
 import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -28,28 +25,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.transaction.annotation.Transactional;
 import org.xml.sax.SAXException;
 
 import br.com.acf.fidelcash.controller.dto.ImportacaoDto;
 import br.com.acf.fidelcash.controller.dto.UtilDtoImplantacao;
-import br.com.acf.fidelcash.controller.service.ClienteService;
-import br.com.acf.fidelcash.controller.service.ContaCorrenteService;
-import br.com.acf.fidelcash.controller.service.CupomFiscalItemService;
-import br.com.acf.fidelcash.controller.service.CupomFiscalService;
 import br.com.acf.fidelcash.controller.service.CupomFiscalXMLImplantacaoService;
 import br.com.acf.fidelcash.controller.service.CupomFiscalXMLImportacaoService;
 import br.com.acf.fidelcash.controller.service.EmpresaService;
-import br.com.acf.fidelcash.controller.service.EnderecoService;
-import br.com.acf.fidelcash.controller.service.GrupoEmpresarialService;
 import br.com.acf.fidelcash.controller.service.PeriodoDeCompraService;
-import br.com.acf.fidelcash.controller.service.ProdutoService;
-import br.com.acf.fidelcash.controller.service.TipoClienteLogService;
-import br.com.acf.fidelcash.controller.service.TipoClienteService;
-import br.com.acf.fidelcash.controller.service.UtilService;
 import br.com.acf.fidelcash.controller.service.exception.EmpresaServiceException;
 import br.com.acf.fidelcash.controller.service.exception.PeriodoDeCompraServiceException;
 import br.com.acf.fidelcash.controller.service.exception.UtilServiceException;
-import br.com.acf.fidelcash.modelo.Cliente;
+import br.com.acf.fidelcash.modelo.Campanha;
 import br.com.acf.fidelcash.modelo.Empresa;
 import br.com.acf.fidelcash.modelo.SituacaoEmpresa;
 import br.com.acf.fidelcash.modelo.exception.CupomFiscalXMLException;
@@ -57,7 +45,8 @@ import br.com.acf.fidelcash.modelo.exception.CupomFiscalXMLException;
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @WebAppConfiguration
-public class CampanhaTeste {
+@Transactional
+public class CampanhaClientesPorPeriodoDeCompraTeste {
 	
 	public static boolean testeConfigurado = false;
 	public static int numeroDeTestes = 0;
@@ -71,41 +60,8 @@ public class CampanhaTeste {
 	@Autowired
 	private EmpresaService empresaService;
 
-	
-
-	@Autowired
-	private ClienteService clienteService;
-	
-	@Autowired
-	private UtilService utilService;
-	
-	@Autowired
-	private CupomFiscalItemService cfItemService;
-	
-	@Autowired
-	private CupomFiscalService cfService;
-	
-	@Autowired
-	private TipoClienteLogService tipoClienteLogService;
-	
-	@Autowired
-	private TipoClienteService tipoClienteService;
-	
-	@Autowired
-	private ProdutoService produtoService;
-
-	@Autowired
-	private GrupoEmpresarialService grupoEmpresarialService;
-	
-	@Autowired
-	private EnderecoService enderecoService;
-	
-	@Autowired
-	private ContaCorrenteService ccService;
-	
 	@Autowired
 	private PeriodoDeCompraService periodoDeCompraService;
-
 	
 	@BeforeEach
 	public void setup() throws IOException, CupomFiscalXMLException, EmpresaServiceException, UtilServiceException,
@@ -152,51 +108,28 @@ public class CampanhaTeste {
 
 	}
 	
-	@AfterEach
-	public void LimparBaseDados() {
-		if(numeroDeTestes == 2) {
-			utilService.deleteByEmpresaIsNull();
-			cfItemService.deleteAll();
-			ccService.deleteAll();
-			cfService.deleteAll();
-			clienteService.deleteAll();
-			tipoClienteLogService.deleteAll();
-			tipoClienteService.deleteAll();
-			produtoService.deleteAll();
-			empresaService.deleteAll();
-			grupoEmpresarialService.deleteAll();
-			enderecoService.deleteAll();
-		}
-	}
-	
 	@Test
-	public void selecionarClientesCampanha() throws PeriodoDeCompraServiceException {
-		LocalDateTime dataFinal = LocalDateTime.parse("2018-08-31T23:59:59"); 
-		Map<Integer, Integer> mapPeriodos = new HashMap<>();
-		mapPeriodos.put(1, 7);
-		mapPeriodos.put(2, 7);
-		mapPeriodos.put(3, 7);
-		mapPeriodos.put(4, 9);
-		mapPeriodos.put(5, 60);
+	public void criarCampanhaPeriodoTeste() throws PeriodoDeCompraServiceException {
+		//CAMPANHA
+		Campanha campanha = new Campanha();
+		campanha.setDescricao("CAMPANHA BONUS POR PERIODO DE COMPRAS");
+		campanha.setDataInicio(LocalDateTime.parse("2018-09-01T00:00:00"));
+		campanha.setDataFim(LocalDateTime.parse("2018-09-30T23:59:59"));
 		
-		Map<Integer, List<Cliente>> mapClientesPorPeriodo = new HashMap<>();		
-		mapClientesPorPeriodo = periodoDeCompraService.selecionarClientes(dataFinal, mapPeriodos);
-		int numeroClientes = 0;
-		for (Map.Entry<Integer, List<Cliente>> periodo : mapClientesPorPeriodo.entrySet()) {
-			if (periodo.getKey() == 1) {
-				numeroClientes = 7;
-			} else if(periodo.getKey() == 2) {
-				numeroClientes = 9;
-			} else if(periodo.getKey() == 3) {
-				numeroClientes = 3;
-			}else if(periodo.getKey() == 4) {
-				numeroClientes = 11;
-			}else if(periodo.getKey() == 5) {
-				numeroClientes = 1;
-			}
-			List<Cliente> clientes = periodo.getValue();
-			assertEquals(numeroClientes, clientes.size());
-		}
+		BigInteger cnpj = new BigInteger("99999999999999");
+		Optional<Empresa> empresa = empresaService.findByCnpj(cnpj);
+		campanha.setEmpresa(empresa.get());
+		
+		
+		//CLIENTES
+		LocalDateTime dataFinal = LocalDateTime.parse("2018-08-31T23:59:59"); 
+		List<Integer> periodo = new ArrayList<Integer>();
+		periodo.add(15);
+		periodo.add(15);
+		periodoDeCompraService.SetPeriodoCampanha(campanha, dataFinal, periodo);
+		
+		assertEquals("CAMPANHA BONUS POR PERIODO DE COMPRAS", campanha.getDescricao());
+		
 	}
 
 
