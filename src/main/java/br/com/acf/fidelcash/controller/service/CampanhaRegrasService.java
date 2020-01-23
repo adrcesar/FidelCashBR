@@ -43,7 +43,7 @@ public abstract class CampanhaRegrasService {
 	protected abstract void setCampanhaRegra(Campanha campanha, List<Cliente> clientes, List<Produto> produtos);
 
 	protected List<Cliente> getClientesDaCampanhaByCampanhaPai(Campanha campanhaPai) {
-		List<Campanha> campanhasFilhas = campanhaService.FindAllByCampanhaPai(campanhaPai);
+		List<Campanha> campanhasFilhas = campanhaService.FindAllByCampanha(campanhaPai);
 		List<CampanhaRegras> regras = new ArrayList<CampanhaRegras>();
 		for(Campanha campanha : campanhasFilhas) {
 			regras.addAll(regrasRepository.findAllByCampanha(campanha));
@@ -60,8 +60,5 @@ public abstract class CampanhaRegrasService {
 		regrasRepository.save(regras);
 	}
 
-	public void deleteAll() {
-		regrasRepository.deleteAll();
-		
-	}
+	
 }

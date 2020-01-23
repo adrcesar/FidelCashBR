@@ -30,8 +30,8 @@ public class CampanhaService {
 		
 	}
 
-	public List<Campanha> FindAllByCampanhaPai(Campanha campanhaPai) {
-		return campanhaRepository.findAllByCampanhaPai(campanhaPai);
+	public List<Campanha> FindAllByCampanha(Campanha campanhaPai) {
+		return campanhaRepository.findAllByCampanhaPaiOrderById(campanhaPai);
 	}
 
 	

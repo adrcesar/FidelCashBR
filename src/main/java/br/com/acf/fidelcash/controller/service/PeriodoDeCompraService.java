@@ -1,10 +1,12 @@
 package br.com.acf.fidelcash.controller.service;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,8 @@ import br.com.acf.fidelcash.modelo.CupomFiscal;
 import br.com.acf.fidelcash.modelo.Produto;
 import br.com.acf.fidelcash.modelo.TipoSelecaoCliente;
 import br.com.acf.fidelcash.modelo.TipoSelecaoProduto;
+import br.com.acf.fidelcash.repository.CampanhaRepository;
+import br.com.acf.fidelcash.repository.PeriodoDeCompraRepository;
 
 @Service
 public class PeriodoDeCompraService extends CampanhaRegrasService{
@@ -28,12 +32,18 @@ public class PeriodoDeCompraService extends CampanhaRegrasService{
 	@Autowired
 	private CupomFiscalService cfService;
 	
+	@Autowired
+	private CampanhaService campanhaService;
+	
+	@Autowired
+	private PeriodoDeCompraRepository periodoRepository;
+	
 	public void SetPeriodoCampanha(Campanha campanhaPai, LocalDateTime dataFinal, List<Integer> periodos) throws PeriodoDeCompraServiceException {
 		this.campanhaPai = campanhaPai;
 		criarCampanhaPai();
 		this.dataFimPeriodo = dataFinal;
 		for(Integer periodo : periodos) {
-			this.dataInicioPeriodo = dataHoraMinutosSegundos(this.dataFimPeriodo.minusDays(periodo), 0, 0, 0);
+			this.dataInicioPeriodo = dataHoraMinutosSegundos(this.dataFimPeriodo.minusDays(periodo - 1), 0, 0, 0);
 			
 			Campanha campanha = configurarCampanha();
 			
@@ -114,11 +124,28 @@ public class PeriodoDeCompraService extends CampanhaRegrasService{
 		}
 		
 	}
-
-	public void deleteAll() {
-		super.deleteAll();
-		
+	
+	public List<Campanha> findCampanhasByCampanhaPai(Campanha campanhaPai){
+		List<Campanha> campanhas = campanhaService.FindAllByCampanha(campanhaPai);
+		return campanhas;
 	}
+
+	public List<CampanhaRegras> findAllByCampanhaPai(Campanha campanhaPai) {
+		List<Campanha> campanhas = findCampanhasByCampanhaPai(campanhaPai);
+		List<CampanhaRegras> regras = new ArrayList<CampanhaRegras>();
+		for(Campanha campanha : campanhas) {
+			Optional<CampanhaRegras> regra = periodoRepository.findById(campanha.getId());
+			regras.add(regra.get());
+		}
+		return regras;
+	}
+
+	public List<CampanhaRegras> findAllByCampanhaAndClienteCpf(Campanha campanha, BigInteger cpf) {
+		return periodoRepository.findAllByCampanhaAndClienteCpf(campanha, cpf);
+		 
+	}
+
+	
 
 	
 }

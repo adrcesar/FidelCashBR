@@ -1,5 +1,7 @@
 package br.com.acf.fidelcash;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
@@ -30,6 +32,7 @@ import org.xml.sax.SAXException;
 
 import br.com.acf.fidelcash.controller.dto.ImportacaoDto;
 import br.com.acf.fidelcash.controller.dto.UtilDtoImplantacao;
+import br.com.acf.fidelcash.controller.service.CampanhaRegrasService;
 import br.com.acf.fidelcash.controller.service.CupomFiscalXMLImplantacaoService;
 import br.com.acf.fidelcash.controller.service.CupomFiscalXMLImportacaoService;
 import br.com.acf.fidelcash.controller.service.EmpresaService;
@@ -38,6 +41,7 @@ import br.com.acf.fidelcash.controller.service.exception.EmpresaServiceException
 import br.com.acf.fidelcash.controller.service.exception.PeriodoDeCompraServiceException;
 import br.com.acf.fidelcash.controller.service.exception.UtilServiceException;
 import br.com.acf.fidelcash.modelo.Campanha;
+import br.com.acf.fidelcash.modelo.CampanhaRegras;
 import br.com.acf.fidelcash.modelo.Empresa;
 import br.com.acf.fidelcash.modelo.SituacaoEmpresa;
 import br.com.acf.fidelcash.modelo.exception.CupomFiscalXMLException;
@@ -45,7 +49,7 @@ import br.com.acf.fidelcash.modelo.exception.CupomFiscalXMLException;
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @WebAppConfiguration
-@Transactional
+//@Transactional
 public class CampanhaClientesPorPeriodoDeCompraTeste {
 	
 	public static boolean testeConfigurado = false;
@@ -111,24 +115,34 @@ public class CampanhaClientesPorPeriodoDeCompraTeste {
 	@Test
 	public void criarCampanhaPeriodoTeste() throws PeriodoDeCompraServiceException {
 		//CAMPANHA
-		Campanha campanha = new Campanha();
-		campanha.setDescricao("CAMPANHA BONUS POR PERIODO DE COMPRAS");
-		campanha.setDataInicio(LocalDateTime.parse("2018-09-01T00:00:00"));
-		campanha.setDataFim(LocalDateTime.parse("2018-09-30T23:59:59"));
+		Campanha campanhaPai = new Campanha();
+		campanhaPai.setDescricao("CAMPANHA BONUS POR PERIODO DE COMPRAS");
+		campanhaPai.setDataInicio(LocalDateTime.parse("2018-09-01T00:00:00"));
+		campanhaPai.setDataFim(LocalDateTime.parse("2018-09-30T23:59:59"));
 		
 		BigInteger cnpj = new BigInteger("99999999999999");
 		Optional<Empresa> empresa = empresaService.findByCnpj(cnpj);
-		campanha.setEmpresa(empresa.get());
+		campanhaPai.setEmpresa(empresa.get());
 		
 		
-		//CLIENTES
+		//PERIDO DE BUSCA DOS CUPONS FISCAIS
 		LocalDateTime dataFinal = LocalDateTime.parse("2018-08-31T23:59:59"); 
 		List<Integer> periodo = new ArrayList<Integer>();
-		periodo.add(15);
-		periodo.add(15);
-		periodoDeCompraService.SetPeriodoCampanha(campanha, dataFinal, periodo);
+		periodo.add(8);
+		periodo.add(8);
+		periodo.add(8);
+		periodo.add(30);
+		periodoDeCompraService.SetPeriodoCampanha(campanhaPai, dataFinal, periodo);
+		// validacoes
+		List<Campanha> campanhas = periodoDeCompraService.findCampanhasByCampanhaPai(campanhaPai);
+		BigInteger cpf = new BigInteger("16368579811");
+		List<CampanhaRegras> regras = periodoDeCompraService.findAllByCampanhaAndClienteCpf(campanhas.get(0), cpf);
+		assertFalse(regras.isEmpty());
+		regras = periodoDeCompraService.findAllByCampanhaAndClienteCpf(campanhas.get(3), cpf);
+		assertTrue(regras.isEmpty());
 		
-		assertEquals("CAMPANHA BONUS POR PERIODO DE COMPRAS", campanha.getDescricao());
+		
+		assertEquals("CAMPANHA BONUS POR PERIODO DE COMPRAS", campanhaPai.getDescricao());
 		
 	}
 

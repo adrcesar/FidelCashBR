@@ -8,6 +8,6 @@ import br.com.acf.fidelcash.modelo.Campanha;
 
 public interface CampanhaRepository extends JpaRepository<Campanha, Integer>{
 
-	List<Campanha> findAllByCampanhaPai(Campanha campanhaPai);
+	List<Campanha> findAllByCampanhaPaiOrderById(Campanha campanhaPai);
 
 }
