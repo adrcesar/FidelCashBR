@@ -1,10 +1,13 @@
 package br.com.acf.fidelcash.controller.dto;
 
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import br.com.acf.fidelcash.modelo.Produto;
 import br.com.acf.fidelcash.modelo.SituacaoProduto;
 
-public class ProdutoImplantacaoDto {
+public class ProdutoDto {
 	private Integer id;
     
 	private String codigoProduto;
@@ -17,7 +20,7 @@ public class ProdutoImplantacaoDto {
     
     private SituacaoProduto situacao;
 
-	public ProdutoImplantacaoDto(Produto produto) {
+	public ProdutoDto(Produto produto) {
 		this.id = produto.getId();
 		this.codigoProduto = produto.getCodigoProduto();
 		this.descricao = produto.getDescricao();
@@ -48,6 +51,10 @@ public class ProdutoImplantacaoDto {
 
 	public SituacaoProduto getSituacao() {
 		return situacao;
+	}
+
+	public static List<ProdutoDto> converter(List<Produto> produtosEmpresa) {
+		return produtosEmpresa.stream().map(ProdutoDto::new).collect(Collectors.toList()); 
 	}
 	
 	

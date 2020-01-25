@@ -21,7 +21,7 @@ public class UtilDtoImplantacao {
 	
 	private TipoClienteImplantacaoDto tipoCliente;
 	
-	private List<ProdutoImplantacaoDto> produtos;
+	private List<ProdutoDto> produtos;
 	
 	private boolean erro = false;
 	private String erroMensagem;
@@ -81,14 +81,14 @@ public class UtilDtoImplantacao {
 		this.tipoCliente = new TipoClienteImplantacaoDto(tipoCliente);
 	}
 
-	public List<ProdutoImplantacaoDto> getProdutos() {
+	public List<ProdutoDto> getProdutos() {
 		return produtos;
 	}
 
 	public void setProdutos(List<Produto> produtos) {
-		this.produtos = new ArrayList<ProdutoImplantacaoDto>();
+		this.produtos = new ArrayList<ProdutoDto>();
 		for(int i = 0; i < produtos.size(); i++) {
-			ProdutoImplantacaoDto prod = new ProdutoImplantacaoDto(produtos.get(i));
+			ProdutoDto prod = new ProdutoDto(produtos.get(i));
 			this.produtos.add(prod);
 		}
 	}

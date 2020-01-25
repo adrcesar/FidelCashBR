@@ -20,7 +20,7 @@ public class CampanhaService {
 		
 	}
 
-	public Optional<Campanha> FindById(Integer id) {
+	public Optional<Campanha> findById(Integer id) {
 		return campanhaRepository.findById(id);
 		
 	}
@@ -30,10 +30,18 @@ public class CampanhaService {
 		
 	}
 
-	public List<Campanha> FindAllByCampanha(Campanha campanhaPai) {
+	public List<Campanha> findAllByCampanhaPai(Campanha campanhaPai) {
 		return campanhaRepository.findAllByCampanhaPaiOrderById(campanhaPai);
 	}
 
+	public List<Campanha> findAllByCampanhaPaiNotNull() {
+		return campanhaRepository.findAllByCampanhaPaiNotNullOrderByEmpresa();
+		 
+	}
+
+	
+
+	
 	
 	
 	

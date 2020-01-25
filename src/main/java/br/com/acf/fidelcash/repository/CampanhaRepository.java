@@ -10,4 +10,6 @@ public interface CampanhaRepository extends JpaRepository<Campanha, Integer>{
 
 	List<Campanha> findAllByCampanhaPaiOrderById(Campanha campanhaPai);
 
+	List<Campanha> findAllByCampanhaPaiNotNullOrderByEmpresa();
+
 }

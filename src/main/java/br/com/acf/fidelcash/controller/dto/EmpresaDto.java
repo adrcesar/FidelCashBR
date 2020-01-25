@@ -1,7 +1,10 @@
 package br.com.acf.fidelcash.controller.dto;
 
 import java.math.BigInteger;
+import java.util.List;
+import java.util.stream.Collectors;
 
+import br.com.acf.fidelcash.modelo.Campanha;
 import br.com.acf.fidelcash.modelo.Empresa;
 import br.com.acf.fidelcash.modelo.SituacaoEmpresa;
 
@@ -41,6 +44,21 @@ public class EmpresaDto {
 	public SituacaoEmpresa getSituacaoEmpresa() {
 		return situacaoEmpresa;
 	}
+
+
+
+	public static List<EmpresaDto> converter(List<Empresa> empresas) {
+		return empresas.stream().map(EmpresaDto::new).collect(Collectors.toList()); 
+		
+	}
+
+	public static EmpresaDto converter(Empresa empresa) {
+		return new EmpresaDto(empresa);
+	}
+
+
+
+	
 	
 	
 	

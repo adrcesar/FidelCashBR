@@ -2,8 +2,6 @@ package br.com.acf.fidelcash.controller.service;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -19,7 +17,6 @@ import br.com.acf.fidelcash.modelo.CupomFiscal;
 import br.com.acf.fidelcash.modelo.Produto;
 import br.com.acf.fidelcash.modelo.TipoSelecaoCliente;
 import br.com.acf.fidelcash.modelo.TipoSelecaoProduto;
-import br.com.acf.fidelcash.repository.CampanhaRepository;
 import br.com.acf.fidelcash.repository.PeriodoDeCompraRepository;
 
 @Service
@@ -126,7 +123,7 @@ public class PeriodoDeCompraService extends CampanhaRegrasService{
 	}
 	
 	public List<Campanha> findCampanhasByCampanhaPai(Campanha campanhaPai){
-		List<Campanha> campanhas = campanhaService.FindAllByCampanha(campanhaPai);
+		List<Campanha> campanhas = campanhaService.findAllByCampanhaPai(campanhaPai);
 		return campanhas;
 	}
 
@@ -143,6 +140,15 @@ public class PeriodoDeCompraService extends CampanhaRegrasService{
 	public List<CampanhaRegras> findAllByCampanhaAndClienteCpf(Campanha campanha, BigInteger cpf) {
 		return periodoRepository.findAllByCampanhaAndClienteCpf(campanha, cpf);
 		 
+	}
+
+	public List<CampanhaRegras> findAllByCampanhaPaiNotNull() {
+		List<Campanha> campanhas = campanhaService.findAllByCampanhaPaiNotNull();
+		List<CampanhaRegras> regras = new ArrayList<CampanhaRegras>();
+		for(Campanha campanha : campanhas) {
+			regras.addAll(periodoRepository.findAllByCampanhaOrderById(campanha));
+		}
+		return regras;
 	}
 
 	

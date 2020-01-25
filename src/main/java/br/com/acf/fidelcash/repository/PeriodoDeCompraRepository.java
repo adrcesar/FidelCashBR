@@ -10,7 +10,7 @@ import br.com.acf.fidelcash.modelo.CampanhaRegras;
 
 public interface PeriodoDeCompraRepository extends JpaRepository<CampanhaRegras, Integer>{
 
-	List<Campanha> findAllByCampanhaOrderById(Campanha campanhaPai);
+	List<CampanhaRegras> findAllByCampanhaOrderById(Campanha campanha);
 
 	List<CampanhaRegras> findAllByCampanhaAndClienteCpf(Campanha campanha, BigInteger cpf);
 
