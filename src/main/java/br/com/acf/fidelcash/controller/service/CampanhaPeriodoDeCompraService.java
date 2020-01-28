@@ -4,13 +4,13 @@ import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.com.acf.fidelcash.controller.service.exception.PeriodoDeCompraServiceException;
 import br.com.acf.fidelcash.modelo.Campanha;
+import br.com.acf.fidelcash.modelo.CampanhaPeriodoDeCompra;
 import br.com.acf.fidelcash.modelo.CampanhaRegras;
 import br.com.acf.fidelcash.modelo.Cliente;
 import br.com.acf.fidelcash.modelo.CupomFiscal;
@@ -20,17 +20,14 @@ import br.com.acf.fidelcash.modelo.TipoSelecaoProduto;
 import br.com.acf.fidelcash.repository.PeriodoDeCompraRepository;
 
 @Service
-public class PeriodoDeCompraService extends CampanhaRegrasService{
+public class CampanhaPeriodoDeCompraService extends CampanhaRegrasService{
 
 	private Campanha campanhaPai;
-	LocalDateTime dataInicioPeriodo;
-	LocalDateTime dataFimPeriodo;	
+	private LocalDateTime dataInicioPeriodo;
+	private LocalDateTime dataFimPeriodo;	
 	
 	@Autowired
 	private CupomFiscalService cfService;
-	
-	@Autowired
-	private CampanhaService campanhaService;
 	
 	@Autowired
 	private PeriodoDeCompraRepository periodoRepository;
@@ -122,34 +119,42 @@ public class PeriodoDeCompraService extends CampanhaRegrasService{
 		
 	}
 	
-	public List<Campanha> findCampanhasByCampanhaPai(Campanha campanhaPai){
-		List<Campanha> campanhas = campanhaService.findAllByCampanhaPai(campanhaPai);
-		return campanhas;
-	}
-
-	public List<CampanhaRegras> findAllByCampanhaPai(Campanha campanhaPai) {
-		List<Campanha> campanhas = findCampanhasByCampanhaPai(campanhaPai);
-		List<CampanhaRegras> regras = new ArrayList<CampanhaRegras>();
-		for(Campanha campanha : campanhas) {
-			Optional<CampanhaRegras> regra = periodoRepository.findById(campanha.getId());
-			regras.add(regra.get());
-		}
-		return regras;
-	}
-
-	public List<CampanhaRegras> findAllByCampanhaAndClienteCpf(Campanha campanha, BigInteger cpf) {
+		public List<CampanhaRegras> findAllByCampanhaAndClienteCpf(Campanha campanha, BigInteger cpf) {
 		return periodoRepository.findAllByCampanhaAndClienteCpf(campanha, cpf);
 		 
 	}
 
-	public List<CampanhaRegras> findAllByCampanhaPaiNotNull() {
-		List<Campanha> campanhas = campanhaService.findAllByCampanhaPaiNotNull();
+	public List<CampanhaRegras> findAllByCampanha(List<Campanha> campanhas) {
 		List<CampanhaRegras> regras = new ArrayList<CampanhaRegras>();
 		for(Campanha campanha : campanhas) {
 			regras.addAll(periodoRepository.findAllByCampanhaOrderById(campanha));
 		}
 		return regras;
 	}
+
+	public void SetPeriodoCampanha(CampanhaPeriodoDeCompra periodoCampanha) throws PeriodoDeCompraServiceException {
+		this.campanhaPai = periodoCampanha.getCampanhaPai();
+		criarCampanhaPai();
+		this.dataFimPeriodo = periodoCampanha.getDataFimPeriodo();
+		for(Integer periodo : periodoCampanha.getDiasDosPeriodos()) {
+			this.dataInicioPeriodo = dataHoraMinutosSegundos(this.dataFimPeriodo.minusDays(periodo - 1), 0, 0, 0);
+			
+			Campanha campanha = configurarCampanha();
+			
+			super.criarCampanhaRegra(campanha);
+			
+			this.dataFimPeriodo = dataHoraMinutosSegundos(this.dataInicioPeriodo.minusDays(1), 23, 59, 59);
+		}
+		
+	}
+
+	public List<CampanhaRegras> findAllByCampanha(Campanha campanha) {
+		return periodoRepository.findAllByCampanha(campanha);
+	}
+
+	
+
+	
 
 	
 

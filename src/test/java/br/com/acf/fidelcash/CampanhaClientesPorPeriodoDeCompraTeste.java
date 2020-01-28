@@ -27,15 +27,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.transaction.annotation.Transactional;
 import org.xml.sax.SAXException;
 
 import br.com.acf.fidelcash.controller.dto.ImportacaoDto;
 import br.com.acf.fidelcash.controller.dto.UtilDtoImplantacao;
+import br.com.acf.fidelcash.controller.service.CampanhaPeriodoDeCompraService;
+import br.com.acf.fidelcash.controller.service.CampanhaService;
 import br.com.acf.fidelcash.controller.service.CupomFiscalXMLImplantacaoService;
 import br.com.acf.fidelcash.controller.service.CupomFiscalXMLImportacaoService;
 import br.com.acf.fidelcash.controller.service.EmpresaService;
-import br.com.acf.fidelcash.controller.service.PeriodoDeCompraService;
 import br.com.acf.fidelcash.controller.service.exception.EmpresaServiceException;
 import br.com.acf.fidelcash.controller.service.exception.PeriodoDeCompraServiceException;
 import br.com.acf.fidelcash.controller.service.exception.UtilServiceException;
@@ -62,9 +62,12 @@ public class CampanhaClientesPorPeriodoDeCompraTeste {
 
 	@Autowired
 	private EmpresaService empresaService;
+	
+	@Autowired
+	private CampanhaService campanhaService;
 
 	@Autowired
-	private PeriodoDeCompraService periodoDeCompraService;
+	private CampanhaPeriodoDeCompraService periodoDeCompraService;
 	
 	@BeforeEach
 	public void setup() throws IOException, CupomFiscalXMLException, EmpresaServiceException, UtilServiceException,
@@ -133,7 +136,8 @@ public class CampanhaClientesPorPeriodoDeCompraTeste {
 		periodo.add(30);
 		periodoDeCompraService.SetPeriodoCampanha(campanhaPai, dataFinal, periodo);
 		// validacoes
-		List<Campanha> campanhas = periodoDeCompraService.findCampanhasByCampanhaPai(campanhaPai);
+		List<Campanha> campanhas = campanhaService.findAllByCampanhaPai(campanhaPai);
+		
 		BigInteger cpf = new BigInteger("16368579811");
 		List<CampanhaRegras> regras = periodoDeCompraService.findAllByCampanhaAndClienteCpf(campanhas.get(0), cpf);
 		assertFalse(regras.isEmpty());

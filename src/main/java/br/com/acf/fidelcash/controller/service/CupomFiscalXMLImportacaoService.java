@@ -24,7 +24,6 @@ import org.xml.sax.SAXException;
 
 import br.com.acf.fidelcash.controller.dto.ImportacaoDto;
 import br.com.acf.fidelcash.controller.service.exception.ClienteServiceException;
-import br.com.acf.fidelcash.controller.service.exception.ContaCorrenteServiceException;
 import br.com.acf.fidelcash.controller.service.exception.CupomFiscalItemServiceException;
 import br.com.acf.fidelcash.controller.service.exception.CupomFiscalServiceException;
 import br.com.acf.fidelcash.controller.service.exception.EmpresaServiceException;

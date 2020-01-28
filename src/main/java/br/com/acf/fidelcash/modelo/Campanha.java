@@ -29,6 +29,17 @@ public class Campanha {
 	@ManyToOne(optional = true)
 	private Campanha campanhaPai;
 
+	public Campanha(String descricao, LocalDateTime dataInicio, LocalDateTime dataFim, Empresa empresa) {
+		this.descricao = descricao;
+		this.dataInicio = dataInicio;
+		this.dataFim = dataFim;
+		this.empresa = empresa;
+	}
+
+	public Campanha() {
+		// TODO Auto-generated constructor stub
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

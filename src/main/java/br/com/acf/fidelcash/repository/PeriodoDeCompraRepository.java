@@ -14,4 +14,6 @@ public interface PeriodoDeCompraRepository extends JpaRepository<CampanhaRegras,
 
 	List<CampanhaRegras> findAllByCampanhaAndClienteCpf(Campanha campanha, BigInteger cpf);
 
+	List<CampanhaRegras> findAllByCampanha(Campanha campanha);
+
 }

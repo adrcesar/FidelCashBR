@@ -22,7 +22,6 @@ public class CampanhaService {
 
 	public Optional<Campanha> findById(Integer id) {
 		return campanhaRepository.findById(id);
-		
 	}
 
 	public void deleteAll() {

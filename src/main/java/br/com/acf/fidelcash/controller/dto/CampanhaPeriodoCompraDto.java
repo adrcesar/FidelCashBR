@@ -15,11 +15,15 @@ public class CampanhaPeriodoCompraDto {
 	private Integer id;
 	private CampanhaDto campanha;
 	private ClienteDto cliente;
-	private List<ProdutoDto> produtos;
+	private List<ProdutoDto> todosProdutosDaEmpresa;
 	
 	public CampanhaPeriodoCompraDto(CampanhaRegras regra, List<Produto> produtos) {
 		this.id = regra.getId();
 		this.campanha = CampanhaDto.converter(regra.getCampanha());
+		//clientes
+		
+		
+		
 		this.cliente = ClienteDto.converter(regra.getCliente());
 		//produtos
 		List<Produto> produtosEmpresa  = new ArrayList<Produto>();
@@ -28,7 +32,7 @@ public class CampanhaPeriodoCompraDto {
 				produtosEmpresa.add(produto);
 			}
 		}
-		this.produtos = ProdutoDto.converter(produtosEmpresa);
+		this.todosProdutosDaEmpresa = ProdutoDto.converter(produtosEmpresa);
 	}
 
 	public static List<CampanhaPeriodoCompraDto> converter(List<CampanhaRegras> regras, List<Produto> produtos) {
@@ -52,8 +56,8 @@ public class CampanhaPeriodoCompraDto {
 		return cliente;
 	}
 
-	public List<ProdutoDto> getProdutos() {
-		return produtos;
+	public List<ProdutoDto> getTodosProdutosDaEmpresa() {
+		return todosProdutosDaEmpresa;
 	}
 	
 	

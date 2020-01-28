@@ -11,6 +11,7 @@ public class FidelcashApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(FidelcashApplication.class, args);
+		
 	}
 
 }

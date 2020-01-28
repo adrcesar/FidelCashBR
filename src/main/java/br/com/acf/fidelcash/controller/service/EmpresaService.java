@@ -3,6 +3,9 @@ package br.com.acf.fidelcash.controller.service;
 import java.math.BigInteger;
 import java.util.Optional;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -74,5 +77,13 @@ public class EmpresaService {
 	public void deleteAll() {
 		empresaRepository.deleteAll();
 		
+	}
+
+	public Empresa findById(@NotNull @NotEmpty Integer idEmpresa) throws EmpresaServiceException {
+		Optional<Empresa> empresa = empresaRepository.findById(idEmpresa);
+		if(empresa.isEmpty()) {
+			throw new EmpresaServiceException("Empresa nao encontrada", "Empresa nao encontrada");
+		}
+		return empresa.get();
 	}
 }
