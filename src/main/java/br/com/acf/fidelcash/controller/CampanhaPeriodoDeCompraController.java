@@ -35,7 +35,7 @@ import br.com.acf.fidelcash.modelo.Produto;
 
 
 @RestController
-@RequestMapping("/campanha/periodocompra")
+@RequestMapping("/campanhas/periodocompras")
 public class CampanhaPeriodoDeCompraController {
 
 	@Autowired
