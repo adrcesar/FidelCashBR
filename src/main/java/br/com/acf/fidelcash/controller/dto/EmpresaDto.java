@@ -4,7 +4,6 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import br.com.acf.fidelcash.modelo.Campanha;
 import br.com.acf.fidelcash.modelo.Empresa;
 import br.com.acf.fidelcash.modelo.SituacaoEmpresa;
 

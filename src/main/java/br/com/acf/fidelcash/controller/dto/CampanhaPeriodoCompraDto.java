@@ -2,12 +2,8 @@ package br.com.acf.fidelcash.controller.dto;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import br.com.acf.fidelcash.modelo.Campanha;
 import br.com.acf.fidelcash.modelo.CampanhaRegras;
-import br.com.acf.fidelcash.modelo.Cliente;
-import br.com.acf.fidelcash.modelo.Empresa;
 import br.com.acf.fidelcash.modelo.Produto;
 
 public class CampanhaPeriodoCompraDto {
