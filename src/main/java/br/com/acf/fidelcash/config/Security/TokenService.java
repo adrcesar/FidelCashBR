@@ -7,16 +7,17 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import br.com.acf.fidelcash.modelo.Usuario;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
 @Service
 public class TokenService {
 	
-	@Value("${forum.jwt.expiration}") // busca de application.properties @Value ao invés de Autowired, pois nao é um bean
+	@Value("${fidel.jwt.expiration}") // busca de application.properties @Value ao invés de Autowired, pois nao é um bean
 	private String expiration;
 	
-	@Value("${forum.jwt.secret}") // busca de application.properties @Value ao invés de Autowired, pois nao é um bean
+	@Value("${fidel.jwt.secret}") // busca de application.properties @Value ao invés de Autowired, pois nao é um bean
 	private String secret;
 
 	public String gerarToken(Authentication authentication) {
@@ -30,6 +31,20 @@ public class TokenService {
 				.setExpiration(dataExpiracao)
 				.signWith(SignatureAlgorithm.HS256, secret)
 				.compact();
+	}
+
+	public boolean isTokenValido(String token) {
+		try {
+			Jwts.parser().setSigningKey(this.secret).parseClaimsJws(token);
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
+	public Integer getIdUsuario(String token) {
+		Claims claims = Jwts.parser().setSigningKey(this.secret).parseClaimsJws(token).getBody();
+		return Integer.parseInt(claims.getSubject()); //foi setado no método *** gerarToken *** 
 	}
 
 }

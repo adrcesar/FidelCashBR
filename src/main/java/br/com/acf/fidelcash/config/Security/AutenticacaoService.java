@@ -8,18 +8,19 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import br.com.acf.fidelcash.controller.service.UsuarioService;
 import br.com.acf.fidelcash.modelo.Usuario;
-import br.com.acf.fidelcash.repository.UsuarioRepository;
+
 
 @Service
 public class AutenticacaoService implements UserDetailsService{
 
 	@Autowired
-	private UsuarioRepository usuarioRepository;
+	private UsuarioService usuarioService;
 	
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		Optional<Usuario> usuario = usuarioRepository.findByUsuario(username);
+		Optional<Usuario> usuario = usuarioService.findByUsuario(username);
 		if(usuario.isPresent()) {
 			return usuario.get();
 		}
