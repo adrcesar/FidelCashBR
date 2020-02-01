@@ -15,12 +15,10 @@ public class CampanhaPeriodoCompraDto {
 	
 	public CampanhaPeriodoCompraDto(CampanhaRegras regra, List<Produto> produtos) {
 		this.id = regra.getId();
-		this.campanha = CampanhaDto.converter(regra.getCampanha());
+		this.campanha = new CampanhaDto(regra.getCampanha());
 		//clientes
 		
-		
-		
-		this.cliente = ClienteDto.converter(regra.getCliente());
+		this.cliente = new ClienteDto(regra.getCliente());
 		//produtos
 		List<Produto> produtosEmpresa  = new ArrayList<Produto>();
 		for(Produto produto : produtos) {

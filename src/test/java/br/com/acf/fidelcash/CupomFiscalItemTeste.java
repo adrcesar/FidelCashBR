@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.junit.jupiter.api.AfterEach;
@@ -25,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
+
 import org.xml.sax.SAXException;
 
 import br.com.acf.fidelcash.controller.dto.ImportacaoDto;
@@ -145,7 +147,7 @@ public class CupomFiscalItemTeste {
 
 	}
 	
-	@AfterEach
+	/*@AfterEach
 	public void LimparBaseDados() {
 		if(numeroDeTestes == 2) {
 			utilService.deleteByEmpresaIsNull();
@@ -160,7 +162,7 @@ public class CupomFiscalItemTeste {
 			grupoEmpresarialService.deleteAll();
 			enderecoService.deleteAll();
 		}
-	}
+	}*/
 	
 
 	@Test

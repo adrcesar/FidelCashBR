@@ -64,8 +64,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		super.configure(web);
 	}
 
-	// obter senha criptografada
-	// public static void main(String[] args) {
-	// System.out.println(new BCryptPasswordEncoder().encode("FCacf4994"));
-	//}
+	 //obter senha criptografada
+	 public static void main(String[] args) {
+	 System.out.println(new BCryptPasswordEncoder().encode("FCacf4994$$"));
+	}
 }

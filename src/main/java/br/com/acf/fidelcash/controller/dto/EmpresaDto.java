@@ -51,9 +51,7 @@ public class EmpresaDto {
 		
 	}
 
-	public static EmpresaDto converter(Empresa empresa) {
-		return new EmpresaDto(empresa);
-	}
+	
 
 
 

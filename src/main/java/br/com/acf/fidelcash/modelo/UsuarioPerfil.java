@@ -118,6 +118,8 @@ public class UsuarioPerfil implements GrantedAuthority{
 	public String getAuthority() {
 		return this.perfil.getNome();
 	}
+
+	
 	
 	
 }

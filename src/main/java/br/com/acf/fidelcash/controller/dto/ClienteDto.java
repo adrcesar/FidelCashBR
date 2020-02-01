@@ -29,10 +29,10 @@ public class ClienteDto {
 		
 	}
     
-    public static ClienteDto converter(Cliente cliente) {
-		return new ClienteDto(cliente); 
+    //public static ClienteDto converter(Cliente cliente) {
+	//	return new ClienteDto(cliente); 
 		
-	}
+	//}
 
 	public Integer getId() {
 		return id;

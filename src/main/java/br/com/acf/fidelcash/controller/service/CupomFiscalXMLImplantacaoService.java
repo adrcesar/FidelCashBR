@@ -30,8 +30,13 @@ import br.com.acf.fidelcash.controller.service.exception.TipoClienteServiceExcep
 import br.com.acf.fidelcash.controller.service.exception.UtilServiceException;
 import br.com.acf.fidelcash.modelo.CupomFiscalXML;
 import br.com.acf.fidelcash.modelo.Empresa;
+import br.com.acf.fidelcash.modelo.Perfil;
 import br.com.acf.fidelcash.modelo.Produto;
+import br.com.acf.fidelcash.modelo.SituacaoUsuario;
+import br.com.acf.fidelcash.modelo.SituacaoUsuarioPerfil;
 import br.com.acf.fidelcash.modelo.TipoCliente;
+import br.com.acf.fidelcash.modelo.Usuario;
+import br.com.acf.fidelcash.modelo.UsuarioPerfil;
 import br.com.acf.fidelcash.modelo.Util;
 import br.com.acf.fidelcash.modelo.exception.CupomFiscalXMLException;
 
@@ -50,6 +55,15 @@ public class CupomFiscalXMLImplantacaoService {
 	@Autowired
 	private TipoClienteService tipoClienteService;
 	
+	@Autowired
+	private UsuarioService usuarioService;
+	
+	@Autowired
+	private PerfilService perfilService;
+	
+	@Autowired
+	private UsuarioPerfilService usuarioPerfilService;
+	
 	@Transactional(rollbackFor = { Exception.class })
 	public UtilDtoImplantacao implantarFidelCash(String cnpjEmpresa)
 			throws CupomFiscalXMLException, EmpresaServiceException, UtilServiceException {
@@ -64,10 +78,34 @@ public class CupomFiscalXMLImplantacaoService {
 			Optional<Util> util = utilService.findByEmpresaAndUtilidade(null, cnpjEmpresa);
 			Optional<TipoCliente> tipoCliente = tipoClienteService.findByEmpresaAndDescricao(empresaFind.get(), "PADRAO");
 			List<Produto> produtos = produtoService.findByEmpresa(empresaFind.get());
+			//
+			setUsuarioAdministrador(empresaFind.get());
+			//
 			return utilService.dadosDaImplantacao(util, tipoCliente, produtos );
 		} catch (IOException | ParseException | ParserConfigurationException | SAXException ex) {
 			throw new CupomFiscalXMLException("Arquivo inconsistente", "Arquivo inconsistente");
 		}
+	}
+	
+	private void setUsuarioAdministrador(Empresa empresa) {
+		Usuario usuario = new Usuario();
+		usuario.setEmail("adrcesar@gmail.com");
+		usuario.setNome("ADMINISTRADOR");
+		usuario.setSenha("$2a$10$zLiEBFy0Qm2EkCm/h5neAuk8ha2QkzBkM96Nglyb1i2U0PtaaeyiK");
+		usuario.setSituacao(SituacaoUsuario.ATIVO);
+		usuario.setUsuario("castro");
+		usuarioService.save(usuario);
+		
+		Perfil perfil = new Perfil();
+		perfil.setNome("ADMINISTRADOR");
+		perfilService.save(perfil);
+		
+		UsuarioPerfil usuarioPerfil = new UsuarioPerfil();
+		usuarioPerfil.setEmpresa(empresa);
+		usuarioPerfil.setPerfil(perfil);
+		usuarioPerfil.setUsuario(usuario);
+		usuarioPerfil.setSituacao(SituacaoUsuarioPerfil.ATIVO);
+		usuarioPerfilService.save(usuarioPerfil);
 	}
 
 	private void criarDiretoriosDeImportacao(String pasta, Empresa empresa) throws CupomFiscalXMLException {

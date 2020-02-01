@@ -21,6 +21,11 @@ public class UsuarioService {
 	public Optional<Usuario> findById(Integer id) {
 		return usuarioRepository.findById(id);
 	}
+
+	public void save(Usuario usuario) {
+		usuarioRepository.save(usuario);
+		
+	}
 	
 	
 

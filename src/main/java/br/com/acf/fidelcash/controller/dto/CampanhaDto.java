@@ -27,9 +27,9 @@ public class CampanhaDto {
 		this.descricao = campanha.getDescricao();
 		this.dataInicio = campanha.getDataInicio();
 		this.dataFim = campanha.getDataFim();
-		this.empresa = EmpresaDto.converter(campanha.getEmpresa()); 
+		this.empresa = new EmpresaDto(campanha.getEmpresa()); 
 		if(campanha.getCampanhaPai() != null) {
-			this.campanhaPai = CampanhaDto.converter(campanha.getCampanhaPai());
+			this.campanhaPai = new CampanhaDto(campanha.getCampanhaPai()); //CampanhaDto.converter(campanha.getCampanhaPai());
 		}
 		
 	}
@@ -38,11 +38,7 @@ public class CampanhaDto {
 		return campanhas.stream().map(CampanhaDto::new).collect(Collectors.toList()); 
 	}
 	
-	public static CampanhaDto converter(Campanha campanha) {
-		return new CampanhaDto(campanha);
-	}
-
-	public Integer getId() {
+		public Integer getId() {
 		return id;
 	}
 

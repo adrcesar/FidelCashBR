@@ -1,4 +1,7 @@
 delete from util where id_empresa is not null;
+delete from usuario_perfil;
+delete from usuario;
+delete from perfil;
 delete from campanha_regras;
 delete from campanha;
 delete from cupom_fiscal_item;
