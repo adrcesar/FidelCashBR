@@ -49,4 +49,8 @@ public class CupomFiscalService {
 		return cupomFiscais;
 	}
 
+	public Optional<CupomFiscal> findByCodigoCupomCliente(int codigoCupom, Cliente cliente) {
+		return cfRespository.findByCodigoCupomAndCliente(codigoCupom, cliente);
+	}
+
 }

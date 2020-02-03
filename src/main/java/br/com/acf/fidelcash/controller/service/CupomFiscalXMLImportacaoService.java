@@ -64,6 +64,9 @@ public class CupomFiscalXMLImportacaoService {
 	@Autowired
 	private ContaCorrenteService ccService;
 
+	@Autowired
+	private CupomFiscalXMLService cfXMLService;
+
 	
 
 	@Transactional(rollbackFor = { Exception.class })
@@ -191,7 +194,7 @@ public class CupomFiscalXMLImportacaoService {
 	private void GerarDadosByXML(Path arquivo, Empresa empresaUtil) throws CupomFiscalXMLException {
 		try {
 			String xml = arquivo.toString();
-			CupomFiscalXML cfXML = new CupomFiscalXML(xml);
+			CupomFiscalXML cfXML = cfXMLService.GerarDadosByXml(xml);
 			Empresa empresaXML = cfXML.getEmpresa();
 
 			List<Produto> produtos = cfXML.getProdutos();

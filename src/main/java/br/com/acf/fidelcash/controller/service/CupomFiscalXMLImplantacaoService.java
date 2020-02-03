@@ -64,6 +64,9 @@ public class CupomFiscalXMLImplantacaoService {
 	@Autowired
 	private UsuarioPerfilService usuarioPerfilService;
 	
+	@Autowired
+	private CupomFiscalXMLService cfXMLService;
+	
 	@Transactional(rollbackFor = { Exception.class })
 	public UtilDtoImplantacao implantarFidelCash(String cnpjEmpresa)
 			throws CupomFiscalXMLException, EmpresaServiceException, UtilServiceException {
@@ -241,14 +244,18 @@ public class CupomFiscalXMLImplantacaoService {
 			throws CupomFiscalXMLException, EmpresaServiceException, TipoClienteServiceException, ProdutoServiceException {
 		try {
 			String xml = arquivo.toString();
-			CupomFiscalXML cfXML = new CupomFiscalXML(xml);
+			CupomFiscalXML cfXML = cfXMLService.GerarDadosByXml(xml);
 			Empresa empresaXML = cfXML.getEmpresa();
 			List<Produto> produtos = cfXML.getProdutos();
 			validaCnpjXml(xml, new BigInteger(cnpjEmpresa), empresaXML.getCnpj());
 			Empresa empresa = empresaService.setEmpresa(empresaXML, cfXML);
 			tipoClienteService.setTipoCliente(empresa);
 			for (int i = 0; i < produtos.size(); i++) {
-				produtoService.setProduto(produtos.get(i), empresa);
+				produtos.get(i).setEmpresa(empresa);
+				Optional<Produto> prodFind = produtoService.findByEmpresaAndCodigoProduto(empresa, produtos.get(i).getCodigoProduto());
+				if(prodFind.isEmpty()) {
+					produtoService.save(produtos.get(i));
+				}
 			}
 		} catch (IOException | ParseException | ParserConfigurationException | SAXException e) {
 			throw new CupomFiscalXMLException("Arquivo inconsistente", "Arquivo inconsistente");

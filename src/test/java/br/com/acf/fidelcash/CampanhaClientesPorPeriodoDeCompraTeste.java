@@ -49,7 +49,7 @@ import br.com.acf.fidelcash.modelo.exception.CupomFiscalXMLException;
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @WebAppConfiguration
-@Transactional
+//@Transactional
 public class CampanhaClientesPorPeriodoDeCompraTeste {
 	
 	public static boolean testeConfigurado = false;

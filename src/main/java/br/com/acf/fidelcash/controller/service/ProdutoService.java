@@ -18,20 +18,10 @@ public class ProdutoService {
 	@Autowired
 	private ProdutoRepository produtoRepository;
 	
-	public Produto setProduto(Produto produto, Empresa empresa) throws ProdutoServiceException {
-		try {
-			Produto prod = produto;
-			prod.setEmpresa(empresa);
-			Optional<Produto> produtoFind = produtoRepository.findByEmpresaAndCodigoProduto(empresa, prod.getCodigoProduto());
-			if (produtoFind.isEmpty()) {
-				produtoRepository.save(prod);
-				produtoFind = produtoRepository.findByEmpresaAndCodigoProduto(empresa, prod.getCodigoProduto());
-			}
-			return produtoFind.get();
-		} catch (Exception e) {
-			throw new ProdutoServiceException("Produto invalido", "Produto invalido");
-		}
-
+	
+	
+	public void save(Produto prod) {
+		produtoRepository.save(prod);
 	}
 	
 	public List<Produto> findByEmpresa(Empresa empresa) {
@@ -41,5 +31,9 @@ public class ProdutoService {
 	public void deleteAll() {
 		produtoRepository.deleteAll();
 		
+	}
+
+	public Optional<Produto> findByEmpresaAndCodigoProduto(Empresa empresa, String codigoProduto) {
+		return produtoRepository.findByEmpresaAndCodigoProduto(empresa, codigoProduto);
 	}
 }
