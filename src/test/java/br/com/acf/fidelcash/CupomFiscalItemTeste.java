@@ -56,7 +56,7 @@ import br.com.acf.fidelcash.modelo.exception.CupomFiscalXMLException;
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @WebAppConfiguration
-@Transactional
+//@Transactional
 
 public class CupomFiscalItemTeste {
 
@@ -109,7 +109,7 @@ public class CupomFiscalItemTeste {
 	public void setup() throws IOException, CupomFiscalXMLException, EmpresaServiceException, UtilServiceException,
 			ParserConfigurationException, SAXException, ParseException {
 
-		//if (!testeConfigurado) {
+		if (!testeConfigurado) {
 			// move arquivos para a pasta de de upload da implantacao
 
 			Path dir = Paths.get("C:\\Projetos\\fidelcash\\arquivos-xml\\99999999999999\\implantacao");
@@ -146,7 +146,7 @@ public class CupomFiscalItemTeste {
 			importacao = cfImporta.importarXml();
 
 			testeConfigurado = true;
-		//}
+		}
 
 	}
 	
