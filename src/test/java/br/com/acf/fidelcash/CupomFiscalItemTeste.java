@@ -24,9 +24,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
-
+import org.springframework.transaction.annotation.Transactional;
 import org.xml.sax.SAXException;
 
 import br.com.acf.fidelcash.controller.dto.ImportacaoDto;
@@ -55,6 +56,8 @@ import br.com.acf.fidelcash.modelo.exception.CupomFiscalXMLException;
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @WebAppConfiguration
+@Transactional
+
 public class CupomFiscalItemTeste {
 
 	public static boolean testeConfigurado = false;
@@ -106,7 +109,7 @@ public class CupomFiscalItemTeste {
 	public void setup() throws IOException, CupomFiscalXMLException, EmpresaServiceException, UtilServiceException,
 			ParserConfigurationException, SAXException, ParseException {
 
-		if (!testeConfigurado) {
+		//if (!testeConfigurado) {
 			// move arquivos para a pasta de de upload da implantacao
 
 			Path dir = Paths.get("C:\\Projetos\\fidelcash\\arquivos-xml\\99999999999999\\implantacao");
@@ -143,7 +146,7 @@ public class CupomFiscalItemTeste {
 			importacao = cfImporta.importarXml();
 
 			testeConfigurado = true;
-		}
+		//}
 
 	}
 	
