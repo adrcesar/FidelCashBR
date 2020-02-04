@@ -17,9 +17,10 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Data for Name: campanha; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: tipo_cliente; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
+INSERT INTO public.tipo_cliente (id, id_empresa, descricao, bonus, situacao) VALUES (312, 331, 'PADRAO', 5, 'ATIVO');
 
 
 --

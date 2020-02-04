@@ -17,7 +17,7 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Data for Name: campanha; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: grupo_empresarial; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 

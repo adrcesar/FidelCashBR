@@ -17,9 +17,10 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Data for Name: campanha; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: endereco; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
+INSERT INTO public.endereco (id, tipo, logradouro, numero_logradouro, complemento_logradouro, bairro, municipio, cep) VALUES (58825, 'EMPRESA', 'RODOVIA ALKINDAR MONTEIRO JUNQUEIRA KM 53 00', 1013, 'KM 53 LOJA 2062', 'CAMPO NOVO', 'BRAGANCA PAULISTA', '12918900');
 
 
 --
