@@ -199,6 +199,11 @@ public class CupomFiscalXMLImportacaoService {
 
 			List<Produto> produtos = cfXML.getProdutos();
 			CupomFiscal cupomFiscal = cfXML.getCupomFiscal();
+			
+			//int posicao = xml.lastIndexOf("\\");
+			//String teste = xml.substring(posicao);
+			cupomFiscal.setArquivo(xml.substring(xml.lastIndexOf("\\") + 1));
+			
 			List<CupomFiscalItem> itens = cfXML.getItens();
 			Cliente cliente = cfXML.getCliente();
 

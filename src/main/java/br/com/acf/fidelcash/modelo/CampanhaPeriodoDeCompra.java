@@ -9,15 +9,17 @@ public class CampanhaPeriodoDeCompra {
 	private Campanha campanhaPai;
 	private LocalDateTime dataFimPeriodo;
 	private List<Integer> diasDosPeriodos;
+	private List<Float> bonusDoPeriodo;
 	
 	public CampanhaPeriodoDeCompra() {
-		// TODO Auto-generated constructor stub
+		
 	}
 	
-	public CampanhaPeriodoDeCompra(Campanha campanha, LocalDateTime dataFinalPeriodo, List<Integer> diasDosPeriodos) {
+	public CampanhaPeriodoDeCompra(Campanha campanha, LocalDateTime dataFinalPeriodo, List<Integer> diasDosPeriodos, List<Float> bonus) {
 		this.campanhaPai = campanha;
 		this.dataFimPeriodo = dataFinalPeriodo;
 		this.diasDosPeriodos = diasDosPeriodos;
+		this.bonusDoPeriodo = bonus;
 	}
 	public Campanha getCampanhaPai() {
 		return campanhaPai;
@@ -36,7 +38,16 @@ public class CampanhaPeriodoDeCompra {
 	}
 	public void setDiasDosPeriodos(List<Integer> diasDosPeriodos) {
 		this.diasDosPeriodos = diasDosPeriodos;
+	}
+
+	public List<Float> getBonusDoPeriodo() {
+		return bonusDoPeriodo;
+	}
+
+	public void setBonusDoPeriodo(List<Float> bonus) {
+		this.bonusDoPeriodo = bonus;
 	}	
+	
 	
 	
 	

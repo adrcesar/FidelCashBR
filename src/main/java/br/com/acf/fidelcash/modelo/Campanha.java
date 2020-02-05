@@ -28,6 +28,8 @@ public class Campanha {
 	@JoinColumn(name = "id_campanha_pai", referencedColumnName = "id")
 	@ManyToOne(optional = true)
 	private Campanha campanhaPai;
+	
+	private float bonus;
 
 	public Campanha(String descricao, LocalDateTime dataInicio, LocalDateTime dataFim, Empresa empresa) {
 		this.descricao = descricao;
@@ -37,7 +39,7 @@ public class Campanha {
 	}
 
 	public Campanha() {
-		// TODO Auto-generated constructor stub
+		
 	}
 
 	@Override
@@ -112,6 +114,16 @@ public class Campanha {
 	public void setCampanhaPai(Campanha campanha) {
 		this.campanhaPai = campanha;
 	}
+
+	public float getBonus() {
+		return bonus;
+	}
+
+	public void setBonus(float bonus) {
+		this.bonus = bonus;
+	}
+
+	
 	
 	
 	

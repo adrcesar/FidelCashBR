@@ -19,9 +19,6 @@ public class CupomFiscal {
     
     private int codigoCupom;
     
-    
-    //@Temporal(TemporalType.TIMESTAMP)
-    //@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy/MM/dd HH:mm:ss")
     private LocalDateTime dataCompra;
     
     private float valor;
@@ -29,6 +26,8 @@ public class CupomFiscal {
     @JoinColumn(name = "id_cliente", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private Cliente cliente;
+    
+    private String arquivo;
     
     public CupomFiscal() {
 		
@@ -77,9 +76,13 @@ public class CupomFiscal {
 	public void setCliente(Cliente cliente) {
 		this.cliente = cliente;
 	}
-	
-	
-    
-    
 
+	public String getArquivo() {
+		return arquivo;
+	}
+
+	public void setArquivo(String arquivo) {
+		this.arquivo = arquivo;
+	}
+	
 }

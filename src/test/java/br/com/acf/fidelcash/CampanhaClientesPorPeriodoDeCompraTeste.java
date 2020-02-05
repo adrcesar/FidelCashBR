@@ -41,6 +41,7 @@ import br.com.acf.fidelcash.controller.service.exception.EmpresaServiceException
 import br.com.acf.fidelcash.controller.service.exception.PeriodoDeCompraServiceException;
 import br.com.acf.fidelcash.controller.service.exception.UtilServiceException;
 import br.com.acf.fidelcash.modelo.Campanha;
+import br.com.acf.fidelcash.modelo.CampanhaPeriodoDeCompra;
 import br.com.acf.fidelcash.modelo.CampanhaRegras;
 import br.com.acf.fidelcash.modelo.Empresa;
 import br.com.acf.fidelcash.modelo.SituacaoEmpresa;
@@ -51,9 +52,6 @@ import br.com.acf.fidelcash.modelo.exception.CupomFiscalXMLException;
 @WebAppConfiguration
 //@Transactional
 public class CampanhaClientesPorPeriodoDeCompraTeste {
-	
-	public static boolean testeConfigurado = false;
-	public static int numeroDeTestes = 0;
 	
 	@Autowired
 	private CupomFiscalXMLImplantacaoService cfImplementa;
@@ -74,7 +72,7 @@ public class CampanhaClientesPorPeriodoDeCompraTeste {
 	public void setup() throws IOException, CupomFiscalXMLException, EmpresaServiceException, UtilServiceException,
 			ParserConfigurationException, SAXException, ParseException {
 
-		if (!testeConfigurado) {
+		
 			// move arquivos para a pasta de de upload da implantacao
 
 			Path dir = Paths.get("C:\\Projetos\\fidelcash\\arquivos-xml\\99999999999999\\implantacao");
@@ -105,13 +103,12 @@ public class CampanhaClientesPorPeriodoDeCompraTeste {
 			empresa.get().setSituacao(SituacaoEmpresa.ATIVA);
 
 			empresaService.save(empresa.get());
-
+			//importar
 			@SuppressWarnings("unused")
 			List<ImportacaoDto> importacao = new ArrayList<ImportacaoDto>();
 			importacao = cfImporta.importarXml();
 
-			testeConfigurado = true;
-		}
+			
 
 	}
 	
@@ -135,7 +132,16 @@ public class CampanhaClientesPorPeriodoDeCompraTeste {
 		periodo.add(8);
 		periodo.add(8);
 		periodo.add(30);
-		periodoDeCompraService.SetPeriodoCampanha(campanhaPai, dataFinal, periodo);
+		List<Float> bonus = new ArrayList<Float>();
+		bonus.add(2f);
+		bonus.add(7.5f);
+		bonus.add(10f);
+		bonus.add(30f);
+		
+		CampanhaPeriodoDeCompra campanhaPeriodoDeCompra =  new CampanhaPeriodoDeCompra(campanhaPai, dataFinal, periodo, bonus);
+		
+		
+		periodoDeCompraService.SetPeriodoCampanha(campanhaPeriodoDeCompra);
 		// validacoes
 		List<Campanha> campanhas = campanhaService.findAllByCampanhaPai(campanhaPai);
 		
@@ -144,8 +150,6 @@ public class CampanhaClientesPorPeriodoDeCompraTeste {
 		assertFalse(regras.isEmpty());
 		regras = periodoDeCompraService.findAllByCampanhaAndClienteCpf(campanhas.get(3), cpf);
 		assertTrue(regras.isEmpty());
-		
-		
 		assertEquals("CAMPANHA BONUS POR PERIODO DE COMPRAS", campanhaPai.getDescricao());
 		
 	}

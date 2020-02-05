@@ -34,12 +34,15 @@ public class CampanhaPeriodoCompraForm {
 	
 	@NotNull @NotEmpty
 	private List<Integer> diasDosPeriodos;
+	
+	@NotNull @NotEmpty
+	private List<Float> bonusDoPeriodo;
 
 	public CampanhaPeriodoDeCompra converter(EmpresaService empresaService) throws EmpresaServiceException {
 		Empresa empresa = empresaService.findById(this.idEmpresa);
 		Campanha campanha = new Campanha(descricao, dataInicio, dataFim, empresa);
 				
-		return new CampanhaPeriodoDeCompra(campanha, this.dataFinalPeriodo, this.diasDosPeriodos);
+		return new CampanhaPeriodoDeCompra(campanha, this.dataFinalPeriodo, this.diasDosPeriodos, this.bonusDoPeriodo);
 	}
 
 	public String getDescricao() {

@@ -1,20 +1,19 @@
-select tipo_cliente.id_empresa, cliente.cpf, cupom_fiscal.codigo_cupom, cupom_fiscal.data_compra,
-	   cupom_fiscal_item.quantidade, cupom_fiscal_item.valor_produto,
-	   cupom_fiscal_item.valor_desconto, cupom_fiscal_item.valor_item,
-	   cupom_fiscal_item.id,
-	   tipo_cliente_log.bonus,
-		cupom_fiscal_item.credito, cupom_fiscal_item.VALOR_DESCONTO, cupom_fiscal_item.saldo
-from   cupom_fiscal_item,
-	   cupom_fiscal,
-	   cliente,
-	   tipo_cliente,
-	   tipo_cliente_log
-where  cupom_fiscal.id 			= cupom_fiscal_item.id_cupom_fiscal
-and    cliente.id 				= cupom_fiscal.id_cliente
-and    tipo_cliente.id 			= cliente.id_tipo_cliente
-and    tipo_cliente.id          = tipo_cliente_log.id_tipo_cliente
-and    cupom_fiscal.data_compra >= tipo_cliente_log.data_inicio
-and    cupom_fiscal.data_compra <= COALESCE(tipo_cliente_log.data_fim, current_timestamp)
-and    cliente.cpf = 16368579811
-order  by  1, 9;
---
+select c.cpf, b.codigo_cupom, b.data_compra,
+	   a.quantidade, a.valor_produto,
+	   a.valor_desconto, a.valor_item,
+	   a.id as item,
+	   (select d.bonus
+	    from   tipo_cliente_log d,
+	           tipo_cliente e
+	   where   e.id = d.id_tipo_cliente
+	   and     e.id = c.id_tipo_cliente
+	   and    b.data_compra >= d.data_inicio
+       and    b.data_compra <= COALESCE(d.data_fim, current_timestamp)) as bonus,
+		a.credito, a.VALOR_DESCONTO, a.saldo
+from   cupom_fiscal_item a,
+	   cupom_fiscal b,
+	   cliente c
+where  b.id 			= a.id_cupom_fiscal
+and    c.id 				= b.id_cliente
+and    c.cpf = 16368579811
+order  by  8;

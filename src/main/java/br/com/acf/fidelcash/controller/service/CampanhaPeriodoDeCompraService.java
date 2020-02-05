@@ -32,21 +32,6 @@ public class CampanhaPeriodoDeCompraService extends CampanhaRegrasService{
 	@Autowired
 	private PeriodoDeCompraRepository periodoRepository;
 	
-	public void SetPeriodoCampanha(Campanha campanhaPai, LocalDateTime dataFinal, List<Integer> periodos) throws PeriodoDeCompraServiceException {
-		this.campanhaPai = campanhaPai;
-		criarCampanhaPai();
-		this.dataFimPeriodo = dataFinal;
-		for(Integer periodo : periodos) {
-			this.dataInicioPeriodo = dataHoraMinutosSegundos(this.dataFimPeriodo.minusDays(periodo - 1), 0, 0, 0);
-			
-			Campanha campanha = configurarCampanha();
-			
-			super.criarCampanhaRegra(campanha);
-			
-			this.dataFimPeriodo = dataHoraMinutosSegundos(this.dataInicioPeriodo.minusDays(1), 23, 59, 59);
-		}
-	}
-	
 	private LocalDateTime dataHoraMinutosSegundos(LocalDateTime data, int hour, int minute, int second) {
     	return LocalDateTime.of(data.getYear(), data.getMonthValue(), data.getDayOfMonth(), hour, minute, second);
     }
@@ -55,7 +40,11 @@ public class CampanhaPeriodoDeCompraService extends CampanhaRegrasService{
 		super.setCampanha(this.campanhaPai);
 	}
 	
-	private Campanha configurarCampanha() {
+	private void comparaBonusPromocaoComBonusEmpresa(Float bonusPromocao) {
+		
+	}
+	
+	private Campanha configurarCampanha(Float bonus) {
 		Campanha campanha = new Campanha();
 		
 		campanha.setEmpresa(campanhaPai.getEmpresa());
@@ -69,6 +58,8 @@ public class CampanhaPeriodoDeCompraService extends CampanhaRegrasService{
 		campanha.setDataFim(campanhaPai.getDataFim());
 		
 		campanha.setCampanhaPai(campanhaPai);
+		
+		campanha.setBonus(bonus);
 		
 		return campanha;
 	}
@@ -136,10 +127,12 @@ public class CampanhaPeriodoDeCompraService extends CampanhaRegrasService{
 		this.campanhaPai = periodoCampanha.getCampanhaPai();
 		criarCampanhaPai();
 		this.dataFimPeriodo = periodoCampanha.getDataFimPeriodo();
-		for(Integer periodo : periodoCampanha.getDiasDosPeriodos()) {
+		for(int i=0; i<periodoCampanha.getDiasDosPeriodos().size(); i++) {
+			int periodo = periodoCampanha.getDiasDosPeriodos().get(i);
+			float bonus = periodoCampanha.getBonusDoPeriodo().get(i);
 			this.dataInicioPeriodo = dataHoraMinutosSegundos(this.dataFimPeriodo.minusDays(periodo - 1), 0, 0, 0);
 			
-			Campanha campanha = configurarCampanha();
+			Campanha campanha = configurarCampanha(bonus);
 			
 			super.criarCampanhaRegra(campanha);
 			

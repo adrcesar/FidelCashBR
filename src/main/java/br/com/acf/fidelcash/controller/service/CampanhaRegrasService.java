@@ -11,6 +11,8 @@ import br.com.acf.fidelcash.modelo.Campanha;
 import br.com.acf.fidelcash.modelo.CampanhaRegras;
 import br.com.acf.fidelcash.modelo.Cliente;
 import br.com.acf.fidelcash.modelo.Produto;
+import br.com.acf.fidelcash.modelo.TipoSelecaoCliente;
+import br.com.acf.fidelcash.modelo.TipoSelecaoProduto;
 import br.com.acf.fidelcash.repository.CampanhaRegrasRepository;
 
 @Service
@@ -58,6 +60,14 @@ public abstract class CampanhaRegrasService {
 	
 	protected void save(CampanhaRegras regras) {
 		regrasRepository.save(regras);
+	}
+
+	public List<CampanhaRegras> findAllByCampanhaCliente(Campanha campanha, Cliente cliente, TipoSelecaoCliente todos) {
+		return regrasRepository.findAllByCampanhaCliente(campanha, cliente, TipoSelecaoCliente.TODOS);
+	}
+
+	public List<CampanhaRegras> findAllByIdProduto(Integer id, Produto produto, TipoSelecaoProduto todos) {
+		return regrasRepository.findAllByIdProduto(id, produto, todos);
 	}
 
 	

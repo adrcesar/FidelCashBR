@@ -1,5 +1,6 @@
 package br.com.acf.fidelcash.controller.service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -9,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 import br.com.acf.fidelcash.controller.service.exception.CupomFiscalItemServiceException;
 import br.com.acf.fidelcash.controller.service.exception.TipoClienteLogServiceException;
+import br.com.acf.fidelcash.modelo.Campanha;
+import br.com.acf.fidelcash.modelo.CampanhaRegras;
 import br.com.acf.fidelcash.modelo.Cliente;
 import br.com.acf.fidelcash.modelo.ContaCorrente;
 import br.com.acf.fidelcash.modelo.CupomFiscal;
@@ -16,6 +19,8 @@ import br.com.acf.fidelcash.modelo.CupomFiscalItem;
 import br.com.acf.fidelcash.modelo.Empresa;
 import br.com.acf.fidelcash.modelo.Produto;
 import br.com.acf.fidelcash.modelo.TipoClienteLog;
+import br.com.acf.fidelcash.modelo.TipoSelecaoCliente;
+import br.com.acf.fidelcash.modelo.TipoSelecaoProduto;
 import br.com.acf.fidelcash.repository.CupomFiscalItemRepository;
 
 @Service
@@ -32,6 +37,12 @@ public class CupomFiscalItemService {
 	
 	@Autowired
 	private ContaCorrenteService ccService;
+	
+	@Autowired
+	private CampanhaService campanhaService;
+	
+	@Autowired
+	private CampanhaRegrasService campanhaRegrasService;
 
 	public void setCupomFiscalItem(List<Produto> produtos, List<CupomFiscalItem> itens, CupomFiscal cupomFiscal, ContaCorrente cc) throws CupomFiscalItemServiceException {
 		try {
@@ -84,37 +95,88 @@ public class CupomFiscalItemService {
 	}
 	
 	private CupomFiscalItem setBonusOuCashBack(CupomFiscalItem cfItem, float saldoAnterior) throws TipoClienteLogServiceException {
-		TipoClienteLog log = tipoClienteLogService.bonusDoPeriodo(cfItem);
 		if (Float.compare(cfItem.getValorDesconto(), 0) == 0) {
-			cfItem = setContaCorrenteBonus(cfItem, saldoAnterior, log);
+			cfItem = setContaCorrenteBonus(cfItem, saldoAnterior);
 		} else {
-			cfItem = setContaCorrenteResgateCashBack(cfItem, saldoAnterior, log);
+			cfItem = setContaCorrenteResgateCashBack(cfItem, saldoAnterior);
 		}
 		return cfItem;
 	}
 	
-	private CupomFiscalItem setContaCorrenteResgateCashBack(CupomFiscalItem cfItem, float saldoAnterior, TipoClienteLog log) {
-		float credito;
-		float valorItemMenosCreditoUtilizado = cfItem.getValorItem() - cfItem.getValorDesconto();
-		if (valorItemMenosCreditoUtilizado <= 0) {
-			credito = 0;
-			cfItem.setCredito(credito);
-		} else {
-			credito = valorDoBonus(valorItemMenosCreditoUtilizado, log.getBonus());
-			cfItem.setCredito(credito);
-		}
-		cfItem.setSaldo(saldoAnterior + credito - cfItem.getValorDesconto());
-		cfItem.setTipoClienteLog(log);
+	private CupomFiscalItem setContaCorrenteResgateCashBack(CupomFiscalItem cfItem, float saldoAnterior) throws TipoClienteLogServiceException {
+		TipoClienteLog log = tipoClienteLogService.bonusDoPeriodo(cfItem);
+		
+		CampanhaRegras regra = new CampanhaRegras();
+		regra = getCampanhaRegras(cfItem);
+		
+		float credito = 0;
+		setCfItem(regra, credito, cfItem, saldoAnterior, log);
+		cfItem.setSaldo(cfItem.getSaldo() - cfItem.getValorDesconto());
+		
 		return cfItem;
 	}
 	
-	private CupomFiscalItem setContaCorrenteBonus(CupomFiscalItem cfItem, float saldoAnterior, TipoClienteLog log) {
-		float credito;
-		credito = valorDoBonus(cfItem.getValorItem(), log.getBonus());
+	
+	private CupomFiscalItem setContaCorrenteBonus(CupomFiscalItem cfItem, float saldoAnterior) throws TipoClienteLogServiceException {
+		TipoClienteLog log = tipoClienteLogService.bonusDoPeriodo(cfItem);
+		
+		CampanhaRegras regra = new CampanhaRegras();
+		regra = getCampanhaRegras(cfItem);
+		
+		float credito = 0;
+		setCfItem(regra, credito, cfItem, saldoAnterior, log);
+		return cfItem;
+	}
+	
+	private void setCfItem(CampanhaRegras regra, float credito, CupomFiscalItem cfItem, float saldoAnterior, TipoClienteLog log) {
+		if(!(regra.getId() == null)) {
+			if(regra.getCampanha().getBonus() > log.getBonus()) {
+				credito = valorDoBonus(cfItem.getValorItem(), regra.getCampanha().getBonus());
+				setCfItemCampanha(cfItem, credito, saldoAnterior);
+			} else {
+				credito = valorDoBonus(cfItem.getValorItem(), log.getBonus());
+				setCfItemLog(cfItem, credito, saldoAnterior, log);
+			}
+		} else {
+			credito = valorDoBonus(cfItem.getValorItem(), log.getBonus());
+			setCfItemLog(cfItem, credito, saldoAnterior, log);
+		}
+	}
+	
+	private void setCfItemCampanha(CupomFiscalItem cfItem, float credito, float saldoAnterior) {
+		cfItem.setCredito(credito);
+		cfItem.setSaldo(saldoAnterior + credito);
+	}
+	
+	private void setCfItemLog(CupomFiscalItem cfItem, float credito, float saldoAnterior, TipoClienteLog log) {
 		cfItem.setCredito(credito);
 		cfItem.setSaldo(saldoAnterior + credito);
 		cfItem.setTipoClienteLog(log);
-		return cfItem;
+	}
+	
+	private CampanhaRegras getCampanhaRegras(CupomFiscalItem cfItem) {
+		Empresa empresa = cfItem.getCupomFiscal().getCliente().getTipoCliente().getEmpresa();
+		LocalDateTime dataCupom = cfItem.getCupomFiscal().getDataCompra();
+		CampanhaRegras regra = new CampanhaRegras();
+		
+		List<Campanha> campanhasAtivas = campanhaService.findAllByEmpresaPeriodoOrderByBonusDesc(empresa, dataCupom);
+		if(!campanhasAtivas.isEmpty()) {
+			for(Campanha campanha : campanhasAtivas) {
+				Cliente cliente = cfItem.getCupomFiscal().getCliente();
+				List<CampanhaRegras> regrasClientes = campanhaRegrasService.findAllByCampanhaCliente(campanha, cliente, TipoSelecaoCliente.TODOS);
+				if(!regrasClientes.isEmpty()) {
+					for(CampanhaRegras regraCliente : regrasClientes) {
+						Produto produto = cfItem.getProduto();
+						List<CampanhaRegras> regrasProdutos = campanhaRegrasService.findAllByIdProduto(regraCliente.getId(), produto, TipoSelecaoProduto.TODOS);
+						if(!regrasProdutos.isEmpty()) {
+							regra = regraCliente;
+							break;
+						}
+					}
+				}
+			}
+		}
+		return regra;
 	}
 	
 	private float valorDoBonus(float valor, float percentual) {

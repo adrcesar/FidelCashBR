@@ -1,5 +1,6 @@
 package br.com.acf.fidelcash.controller.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.com.acf.fidelcash.modelo.Campanha;
+import br.com.acf.fidelcash.modelo.Empresa;
 import br.com.acf.fidelcash.repository.CampanhaRepository;
 
 @Service
@@ -36,6 +38,10 @@ public class CampanhaService {
 	public List<Campanha> findAllByCampanhaPaiNotNull() {
 		return campanhaRepository.findAllByCampanhaPaiNotNullOrderByEmpresa();
 		 
+	}
+
+	public List<Campanha> findAllByEmpresaPeriodoOrderByBonusDesc(Empresa empresa, LocalDateTime dataCupom) {
+		return campanhaRepository.findAllByEmpresaPeriodoOrderByBonusDesc(empresa, dataCupom);
 	}
 
 	
