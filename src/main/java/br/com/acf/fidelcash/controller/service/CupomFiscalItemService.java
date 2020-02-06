@@ -132,7 +132,7 @@ public class CupomFiscalItemService {
 		if(!(regra.getId() == null)) {
 			if(regra.getCampanha().getBonus() > log.getBonus()) {
 				credito = valorDoBonus(cfItem.getValorItem(), regra.getCampanha().getBonus());
-				setCfItemCampanha(cfItem, credito, saldoAnterior);
+				setCfItemCampanha(cfItem, credito, saldoAnterior, regra);
 			} else {
 				credito = valorDoBonus(cfItem.getValorItem(), log.getBonus());
 				setCfItemLog(cfItem, credito, saldoAnterior, log);
@@ -143,9 +143,10 @@ public class CupomFiscalItemService {
 		}
 	}
 	
-	private void setCfItemCampanha(CupomFiscalItem cfItem, float credito, float saldoAnterior) {
+	private void setCfItemCampanha(CupomFiscalItem cfItem, float credito, float saldoAnterior, CampanhaRegras regra) {
 		cfItem.setCredito(credito);
 		cfItem.setSaldo(saldoAnterior + credito);
+		cfItem.setCampanhaRegras(regra);
 	}
 	
 	private void setCfItemLog(CupomFiscalItem cfItem, float credito, float saldoAnterior, TipoClienteLog log) {

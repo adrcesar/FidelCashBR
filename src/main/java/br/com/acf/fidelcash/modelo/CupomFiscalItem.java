@@ -43,6 +43,10 @@ public class CupomFiscalItem {
     @JoinColumn(name = "id_tipo_cliente_log", referencedColumnName = "id")
     @ManyToOne(optional = true)
     private TipoClienteLog tipoClienteLog;
+    
+    @JoinColumn(name = "id_campanha_regras", referencedColumnName = "id")
+    @ManyToOne(optional = true)
+    private CampanhaRegras campanhaRegras;
 
 	public CupomFiscalItem() {
 		
@@ -167,6 +171,15 @@ public class CupomFiscalItem {
 		this.tipoClienteLog = tipoClienteLog;
 	}
 
+	public CampanhaRegras getCampanhaRegras() {
+		return campanhaRegras;
+	}
+
+	public void setCampanhaRegras(CampanhaRegras campanhaRegras) {
+		this.campanhaRegras = campanhaRegras;
+	}
+	
+	
 	
 
 	    
