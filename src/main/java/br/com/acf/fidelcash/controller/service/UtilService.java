@@ -1,5 +1,9 @@
 package br.com.acf.fidelcash.controller.service;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,7 +51,6 @@ public class UtilService {
 		if (utilFind.isPresent()) {
 			utilRepository.delete(utilFind.get());
 		}
-		
 		Util util = new Util();
 		util.setUtilidade(utilidade);
 		util.setPasta(pasta);
@@ -154,5 +157,23 @@ public class UtilService {
 		
 		
 	}
+
+	public void criarDiretorio(String diretorio) throws UtilServiceException {
+		 Path dir = Paths.get(diretorio);
+		 File file = new File(diretorio);
+		 if (Files.notExists(dir)) {
+			 boolean bool = file.mkdirs();
+		      if(!bool){
+		    	  throw new UtilServiceException("Erro ao criar diretorio", "Erro ao criar diretorio");
+		      }
+		 }
+	}
+
+	public void save(Util util) {
+		utilRepository.save(util);
+		
+	}
+
+	
 
 }

@@ -36,6 +36,7 @@ import br.com.acf.fidelcash.controller.service.CupomFiscalXMLImplantacaoService;
 import br.com.acf.fidelcash.controller.service.CupomFiscalXMLImportacaoService;
 import br.com.acf.fidelcash.controller.service.EmpresaService;
 import br.com.acf.fidelcash.controller.service.ProdutoService;
+import br.com.acf.fidelcash.controller.service.UtilService;
 import br.com.acf.fidelcash.controller.service.exception.EmpresaServiceException;
 import br.com.acf.fidelcash.controller.service.exception.UtilServiceException;
 import br.com.acf.fidelcash.modelo.Cliente;
@@ -43,6 +44,7 @@ import br.com.acf.fidelcash.modelo.CupomFiscal;
 import br.com.acf.fidelcash.modelo.Empresa;
 import br.com.acf.fidelcash.modelo.Produto;
 import br.com.acf.fidelcash.modelo.SituacaoEmpresa;
+import br.com.acf.fidelcash.modelo.Util;
 import br.com.acf.fidelcash.modelo.exception.CupomFiscalXMLException;
 
 @SpringBootTest
@@ -67,8 +69,46 @@ public class CupomFiscalXMLImplantacaoServiceTest {
 
 	@Autowired
 	private ClienteService clienteService;
+	
+	@Autowired
+	private UtilService utilService;
 
-	private void copiarPara(String diretorioOrigem, String diretorioDestino) throws IOException {
+	private void criarDiretoriosDeImplantacao() throws EmpresaServiceException, UtilServiceException {
+		String cnpjUrl = "99999999999999";
+		empresaService.validaEmpresaImplantada(cnpjUrl);
+		Optional<Util> diretorioPadrao = utilService.findByEmpresaAndUtilidade(null, "DIRETORIO_PADRAO");
+		if(diretorioPadrao.isEmpty()) {
+			utilService.criarDiretorio("C:\\Projetos\\fidelcash\\arquivos-xml");
+			Util util = new Util();
+			util.setUtilidade("DIRETORIO_PADRAO");
+			util.setPasta("C:\\Projetos\\fidelcash\\arquivos-xml");
+			util.setAcao("PASTA QUE ARMAZENARÁ TODA A ESTRUTURA DE ARQUIVOS XML DAS EMPRESAS");
+			utilService.save(util);
+		}
+		utilService.criarDiretorio("C:\\Projetos\\fidelcash\\arquivos-xml\\99999999999999\\implantacao\\upload");
+		Optional<Util> diretorioEmpresaImplantacao = utilService.findByEmpresaAndUtilidade(null, "99999999999999");
+		if(diretorioEmpresaImplantacao.isEmpty()) {
+			Util util = new Util();
+			util.setUtilidade("99999999999999");
+			util.setPasta("C:\\Projetos\\fidelcash\\arquivos-xml\\99999999999999\\implantacao\\upload");
+			util.setAcao("ARMAZENA OS ARQUIVOS XML QUE GERARAO A IMPLANTACAO DA EMPRESA");
+			utilService.save(util);
+		}
+		//
+		utilService.criarDiretorio("C:\\Projetos\\fidelcash\\arquivos-xml\\26501145000160\\implantacao\\upload");
+		Optional<Util> diretorioEmpresaImplantacao2 = utilService.findByEmpresaAndUtilidade(null, "26501145000160");
+		if(diretorioEmpresaImplantacao2.isEmpty()) {
+			Util util = new Util();
+			util.setUtilidade("26501145000160");
+			util.setPasta("C:\\Projetos\\fidelcash\\arquivos-xml\\26501145000160\\implantacao\\upload");
+			util.setAcao("ARMAZENA OS ARQUIVOS XML QUE GERARAO A IMPLANTACAO DA EMPRESA");
+			utilService.save(util);
+		}
+	}
+	
+	
+	
+	private void copiarDePara(String diretorioOrigem, String diretorioDestino) throws IOException {
 		Path dir = Paths.get(diretorioOrigem);
 		DirectoryStream<Path> directoryStream = Files.newDirectoryStream(dir, "*.xml*");
 		for (Path arquivoOrigem : directoryStream) {
@@ -81,10 +121,10 @@ public class CupomFiscalXMLImplantacaoServiceTest {
 	@Test
 	public void implantarEmpresa() throws IOException, CupomFiscalXMLException, EmpresaServiceException,
 			UtilServiceException, ParserConfigurationException, SAXException, ParseException {
-
-		copiarPara("C:\\Projetos\\fidelcash\\arquivos-xml\\99999999999999\\implantacao", 
+		criarDiretoriosDeImplantacao();
+		
+		copiarDePara("C:\\Projetos\\fidelcash\\arquivos-xml\\99999999999999\\implantacao", 
 				   "C:\\Projetos\\fidelcash\\arquivos-xml\\99999999999999\\implantacao\\upload");
-
 		// implantar
 		BigInteger cnpj = new BigInteger("99999999999999");
 		@SuppressWarnings("unused")
@@ -98,8 +138,9 @@ public class CupomFiscalXMLImplantacaoServiceTest {
 	@Test
 	public void EmpresaJaCadastrada() throws IOException, CupomFiscalXMLException, EmpresaServiceException,
 			UtilServiceException, ParserConfigurationException, SAXException, ParseException {
-
-		copiarPara("C:\\Projetos\\fidelcash\\arquivos-xml\\99999999999999\\implantacao",
+		criarDiretoriosDeImplantacao();
+		
+		copiarDePara("C:\\Projetos\\fidelcash\\arquivos-xml\\99999999999999\\implantacao",
 				   "C:\\Projetos\\fidelcash\\arquivos-xml\\99999999999999\\implantacao\\upload");
 
 		// implantar
@@ -112,7 +153,7 @@ public class CupomFiscalXMLImplantacaoServiceTest {
 		assertEquals("PRIME PREMIUM MEDIO", produto.get().getDescricao());
 		// Importar
 		// move arquivos para a pasta de de upload da importacao
-		copiarPara("C:\\Projetos\\fidelcash\\arquivos-xml\\99999999999999\\importacao",
+		copiarDePara("C:\\Projetos\\fidelcash\\arquivos-xml\\99999999999999\\importacao",
 				   "C:\\Projetos\\fidelcash\\arquivos-xml\\99999999999999\\importacao\\upload");
 		//setar empresa para ATIVA
 		empresa = empresaService.findByCnpj(cnpj);
@@ -129,7 +170,7 @@ public class CupomFiscalXMLImplantacaoServiceTest {
 		assertTrue(cf.isPresent());
 		
 		//implantar novamente a mesma empresa
-		copiarPara("C:\\Projetos\\fidelcash\\arquivos-xml\\99999999999999\\implantacao",
+		copiarDePara("C:\\Projetos\\fidelcash\\arquivos-xml\\99999999999999\\implantacao",
 				   "C:\\Projetos\\fidelcash\\arquivos-xml\\99999999999999\\implantacao\\upload");
 		// implantar
 		Exception exception = assertThrows(EmpresaServiceException.class, () -> {
@@ -143,7 +184,9 @@ public class CupomFiscalXMLImplantacaoServiceTest {
 	@Test
 	public void arquivoXmlNaoEncontrado()
 			throws IOException, CupomFiscalXMLException, EmpresaServiceException, UtilServiceException {
-		copiarPara("C:\\Projetos\\fidelcash\\arquivos-xml\\99999999999999\\implantacao",
+		criarDiretoriosDeImplantacao();
+		
+		copiarDePara("C:\\Projetos\\fidelcash\\arquivos-xml\\99999999999999\\implantacao",
 				   "C:\\Projetos\\fidelcash\\arquivos-xml\\99999999999999\\implantacao\\upload");
 
 		// implantar
@@ -159,7 +202,9 @@ public class CupomFiscalXMLImplantacaoServiceTest {
 	@Test
 	public void cnpjInformadoDiferenteDoXml()
 			throws IOException, CupomFiscalXMLException, EmpresaServiceException, UtilServiceException {
-		copiarPara("C:\\Projetos\\fidelcash\\arquivos-xml\\99999999999999\\implantacao",
+		criarDiretoriosDeImplantacao();
+		
+		copiarDePara("C:\\Projetos\\fidelcash\\arquivos-xml\\99999999999999\\implantacao",
 				   "C:\\Projetos\\fidelcash\\arquivos-xml\\26501145000160\\implantacao\\upload");
 
 		// implantar

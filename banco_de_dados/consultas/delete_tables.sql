@@ -1,4 +1,4 @@
-delete from util where id_empresa is not null;
+delete from util;
 delete from usuario_perfil;
 delete from usuario;
 delete from perfil;
@@ -16,7 +16,7 @@ delete from grupo_empresarial;
 delete from endereco;
 commit;
 --
-select * from empresa;
+select * from util;
 --
 
 
