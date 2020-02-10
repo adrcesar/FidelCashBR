@@ -48,9 +48,11 @@ import br.com.acf.fidelcash.controller.service.GrupoEmpresarialService;
 import br.com.acf.fidelcash.controller.service.ProdutoService;
 import br.com.acf.fidelcash.controller.service.TipoClienteLogService;
 import br.com.acf.fidelcash.controller.service.TipoClienteService;
+import br.com.acf.fidelcash.controller.service.UsuarioService;
 import br.com.acf.fidelcash.controller.service.UtilService;
 import br.com.acf.fidelcash.controller.service.exception.EmpresaServiceException;
 import br.com.acf.fidelcash.controller.service.exception.PeriodoDeCompraServiceException;
+import br.com.acf.fidelcash.controller.service.exception.UsuarioServiceException;
 import br.com.acf.fidelcash.controller.service.exception.UtilServiceException;
 import br.com.acf.fidelcash.modelo.Campanha;
 import br.com.acf.fidelcash.modelo.CampanhaPeriodoDeCompra;
@@ -59,6 +61,7 @@ import br.com.acf.fidelcash.modelo.Cliente;
 import br.com.acf.fidelcash.modelo.ContaCorrente;
 import br.com.acf.fidelcash.modelo.Empresa;
 import br.com.acf.fidelcash.modelo.SituacaoEmpresa;
+import br.com.acf.fidelcash.modelo.Usuario;
 import br.com.acf.fidelcash.modelo.exception.CupomFiscalXMLException;
 
 @SpringBootTest
@@ -115,6 +118,9 @@ public class CupomFiscalItemTeste {
 	
 	@Autowired
 	private CampanhaService campanhaService;
+	
+	@Autowired
+	private UsuarioService usuarioService;
 
 	@BeforeEach
 	public void setup() throws IOException, CupomFiscalXMLException, EmpresaServiceException, UtilServiceException,
@@ -163,7 +169,7 @@ public class CupomFiscalItemTeste {
 
 	@Test
 	public void importacaoComCampanhaAtiva() throws IOException, ParserConfigurationException, SAXException,
-			ParseException, CupomFiscalXMLException, UtilServiceException, PeriodoDeCompraServiceException {
+			ParseException, CupomFiscalXMLException, UtilServiceException, PeriodoDeCompraServiceException, UsuarioServiceException {
 		// CAMPANHA
 		Campanha campanhaPai = new Campanha();
 		campanhaPai.setDescricao("CAMPANHA BONUS POR PERIODO DE COMPRAS");
@@ -190,7 +196,9 @@ public class CupomFiscalItemTeste {
 		CampanhaPeriodoDeCompra campanhaPeriodoDeCompra = new CampanhaPeriodoDeCompra(campanhaPai, dataFinal, periodo,
 				bonus);
 
-		periodoDeCompraService.SetPeriodoCampanha(campanhaPeriodoDeCompra);
+		Optional<Usuario> usuario = usuarioService.findByUsuario("castro");
+		
+		periodoDeCompraService.SetPeriodoCampanha(campanhaPeriodoDeCompra, usuario.get());
 		// validacoes
 		List<Campanha> campanhas = campanhaService.findAllByCampanhaPai(campanhaPai);
 

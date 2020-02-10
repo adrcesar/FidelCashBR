@@ -37,14 +37,17 @@ import br.com.acf.fidelcash.controller.service.CampanhaService;
 import br.com.acf.fidelcash.controller.service.CupomFiscalXMLImplantacaoService;
 import br.com.acf.fidelcash.controller.service.CupomFiscalXMLImportacaoService;
 import br.com.acf.fidelcash.controller.service.EmpresaService;
+import br.com.acf.fidelcash.controller.service.UsuarioService;
 import br.com.acf.fidelcash.controller.service.exception.EmpresaServiceException;
 import br.com.acf.fidelcash.controller.service.exception.PeriodoDeCompraServiceException;
+import br.com.acf.fidelcash.controller.service.exception.UsuarioServiceException;
 import br.com.acf.fidelcash.controller.service.exception.UtilServiceException;
 import br.com.acf.fidelcash.modelo.Campanha;
 import br.com.acf.fidelcash.modelo.CampanhaPeriodoDeCompra;
 import br.com.acf.fidelcash.modelo.CampanhaRegras;
 import br.com.acf.fidelcash.modelo.Empresa;
 import br.com.acf.fidelcash.modelo.SituacaoEmpresa;
+import br.com.acf.fidelcash.modelo.Usuario;
 import br.com.acf.fidelcash.modelo.exception.CupomFiscalXMLException;
 
 @SpringBootTest
@@ -67,6 +70,9 @@ public class CampanhaClientesPorPeriodoDeCompraTeste {
 
 	@Autowired
 	private CampanhaPeriodoDeCompraService periodoDeCompraService;
+
+	@Autowired
+	private UsuarioService usuarioService;
 	
 	@BeforeEach
 	public void setup() throws IOException, CupomFiscalXMLException, EmpresaServiceException, UtilServiceException,
@@ -113,7 +119,7 @@ public class CampanhaClientesPorPeriodoDeCompraTeste {
 	}
 	
 	@Test
-	public void criarCampanhaPeriodoTeste() throws PeriodoDeCompraServiceException {
+	public void criarCampanhaPeriodoTeste() throws PeriodoDeCompraServiceException, UsuarioServiceException {
 		//CAMPANHA
 		Campanha campanhaPai = new Campanha();
 		campanhaPai.setDescricao("CAMPANHA BONUS POR PERIODO DE COMPRAS");
@@ -140,8 +146,9 @@ public class CampanhaClientesPorPeriodoDeCompraTeste {
 		
 		CampanhaPeriodoDeCompra campanhaPeriodoDeCompra =  new CampanhaPeriodoDeCompra(campanhaPai, dataFinal, periodo, bonus);
 		
+		Optional<Usuario> usuario = usuarioService.findByUsuario("castro");
 		
-		periodoDeCompraService.SetPeriodoCampanha(campanhaPeriodoDeCompra);
+		periodoDeCompraService.SetPeriodoCampanha(campanhaPeriodoDeCompra, usuario.get());
 		// validacoes
 		List<Campanha> campanhas = campanhaService.findAllByCampanhaPai(campanhaPai);
 		
