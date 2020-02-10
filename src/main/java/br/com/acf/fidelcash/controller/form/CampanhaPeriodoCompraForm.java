@@ -92,6 +92,15 @@ public class CampanhaPeriodoCompraForm {
 	public void setDiasDosPeriodos(List<Integer> diasDosPeriodos) {
 		this.diasDosPeriodos = diasDosPeriodos;
 	}
+
+	public List<Float> getBonusDoPeriodo() {
+		return bonusDoPeriodo;
+	}
+
+	public void setBonusDoPeriodo(List<Float> bonusDoPeriodo) {
+		this.bonusDoPeriodo = bonusDoPeriodo;
+	}
+	
 	
 	
 

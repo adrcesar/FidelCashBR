@@ -35,18 +35,18 @@ public class UtilService {
 		}
 	}
 	
-	public void criarUtilidadeImplantacao(String pastaImportacao, String utilidade, String acao) {
-		Util util = setUtil(pastaImportacao, utilidade, acao);
+	public void criarUtilidadeImplantacao(String pastaImplantacao, String utilidade, String acao) {
+		Util util = setUtilSemEmpresa(pastaImplantacao, utilidade, acao);
 		utilRepository.save(util);
 	}
 	
 	public void criarUtilidadeImportacaoXml(String pastaImportacao, String utilidade, String acao, Empresa empresa) {
-		Util util = setUtil(pastaImportacao, utilidade, acao);
+		Util util = setUtilSemEmpresa(pastaImportacao, utilidade, acao);
 		util.setEmpresa(empresa);
 		utilRepository.save(util);
 	}
 	
-	public Util setUtil(String pasta, String utilidade, String acao) {
+	public Util setUtilSemEmpresa(String pasta, String utilidade, String acao) {
 		Optional<Util> utilFind = utilRepository.findByEmpresaAndUtilidade(null, utilidade);
 		if (utilFind.isPresent()) {
 			utilRepository.delete(utilFind.get());

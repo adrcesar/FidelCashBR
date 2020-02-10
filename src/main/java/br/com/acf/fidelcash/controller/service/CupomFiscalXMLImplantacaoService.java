@@ -72,6 +72,18 @@ public class CupomFiscalXMLImplantacaoService {
 			throws CupomFiscalXMLException, EmpresaServiceException, UtilServiceException {
 		try {
 			empresaService.validaEmpresaImplantada(cnpjEmpresa);
+			
+			Optional<Util> diretorioPadrao = utilService.findByEmpresaAndUtilidade(null, "DIRETORIO_PADRAO");
+			if(diretorioPadrao.isEmpty()) {
+				utilService.criarDiretorio("C:\\Projetos\\fidelcash\\arquivos-xml");
+				utilService.criarUtilidadeImplantacao("C:\\Projetos\\fidelcash\\arquivos-xml", "DIRETORIO_PADRAO", "PASTA QUE ARMAZENARÁ TODA A ESTRUTURA DE ARQUIVOS XML DAS EMPRESAS");
+				diretorioPadrao = utilService.findByEmpresaAndUtilidade(null, "DIRETORIO_PADRAO");
+			}
+			String diretorioEmpresa = diretorioPadrao.get().getPasta()+"\\"+cnpjEmpresa+"\\implantacao\\upload";
+			utilService.criarDiretorio(diretorioEmpresa);
+			utilService.criarUtilidadeImplantacao(diretorioEmpresa,
+												  cnpjEmpresa,
+					                              "ARMAZENA OS ARQUIVOS XML QUE GERARAO A IMPLANTACAO DA EMPRESA");
 			String pasta = utilService.getPastaXML(cnpjEmpresa);
 			Map<Path, String> mapArquivos = implantarEmpresaByXml(pasta, cnpjEmpresa);
 			Optional<Empresa> empresaFind = empresaService.findByCnpj(new BigInteger(cnpjEmpresa));

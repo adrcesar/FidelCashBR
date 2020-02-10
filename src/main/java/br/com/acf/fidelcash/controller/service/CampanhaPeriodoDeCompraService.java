@@ -6,17 +6,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import br.com.acf.fidelcash.controller.service.exception.PeriodoDeCompraServiceException;
+import br.com.acf.fidelcash.controller.service.exception.UsuarioServiceException;
 import br.com.acf.fidelcash.modelo.Campanha;
 import br.com.acf.fidelcash.modelo.CampanhaPeriodoDeCompra;
 import br.com.acf.fidelcash.modelo.CampanhaRegras;
 import br.com.acf.fidelcash.modelo.Cliente;
 import br.com.acf.fidelcash.modelo.CupomFiscal;
+import br.com.acf.fidelcash.modelo.Perfil;
 import br.com.acf.fidelcash.modelo.Produto;
 import br.com.acf.fidelcash.modelo.TipoSelecaoCliente;
 import br.com.acf.fidelcash.modelo.TipoSelecaoProduto;
+import br.com.acf.fidelcash.modelo.Usuario;
+import br.com.acf.fidelcash.modelo.UsuarioPerfil;
 import br.com.acf.fidelcash.repository.PeriodoDeCompraRepository;
 
 @Service
@@ -31,6 +36,9 @@ public class CampanhaPeriodoDeCompraService extends CampanhaRegrasService{
 	
 	@Autowired
 	private PeriodoDeCompraRepository periodoRepository;
+	
+	@Autowired
+	private UsuarioService usuarioService;
 	
 	private LocalDateTime dataHoraMinutosSegundos(LocalDateTime data, int hour, int minute, int second) {
     	return LocalDateTime.of(data.getYear(), data.getMonthValue(), data.getDayOfMonth(), hour, minute, second);
@@ -123,7 +131,10 @@ public class CampanhaPeriodoDeCompraService extends CampanhaRegrasService{
 		return regras;
 	}
 
-	public void SetPeriodoCampanha(CampanhaPeriodoDeCompra periodoCampanha) throws PeriodoDeCompraServiceException {
+	public void SetPeriodoCampanha(CampanhaPeriodoDeCompra periodoCampanha, Usuario logado) throws PeriodoDeCompraServiceException, UsuarioServiceException {
+		
+		usuarioService.verificaPerfil(logado, "ADMINISTRADOR");
+		
 		this.campanhaPai = periodoCampanha.getCampanhaPai();
 		criarCampanhaPai();
 		this.dataFimPeriodo = periodoCampanha.getDataFimPeriodo();

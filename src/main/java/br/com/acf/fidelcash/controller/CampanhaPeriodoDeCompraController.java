@@ -10,6 +10,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,11 +28,13 @@ import br.com.acf.fidelcash.controller.service.EmpresaService;
 import br.com.acf.fidelcash.controller.service.ProdutoService;
 import br.com.acf.fidelcash.controller.service.exception.EmpresaServiceException;
 import br.com.acf.fidelcash.controller.service.exception.PeriodoDeCompraServiceException;
+import br.com.acf.fidelcash.controller.service.exception.UsuarioServiceException;
 import br.com.acf.fidelcash.modelo.Campanha;
 import br.com.acf.fidelcash.modelo.CampanhaPeriodoDeCompra;
 import br.com.acf.fidelcash.modelo.CampanhaRegras;
 import br.com.acf.fidelcash.modelo.Empresa;
 import br.com.acf.fidelcash.modelo.Produto;
+import br.com.acf.fidelcash.modelo.Usuario;
 
 
 @RestController
@@ -103,9 +106,9 @@ public class CampanhaPeriodoDeCompraController {
 	@Transactional
 	// @Valid - utiliza o bean validation da classe TopicoForm
 	public ResponseEntity<CampanhaDto> cadastrar(@RequestBody @Valid CampanhaPeriodoCompraForm form,
-			UriComponentsBuilder uriBuilder) throws EmpresaServiceException, PeriodoDeCompraServiceException {
+			UriComponentsBuilder uriBuilder, @AuthenticationPrincipal Usuario logado) throws EmpresaServiceException, PeriodoDeCompraServiceException, UsuarioServiceException {
 		CampanhaPeriodoDeCompra periodo = form.converter(empresaService);
-		periodoService.SetPeriodoCampanha(periodo);
+		periodoService.SetPeriodoCampanha(periodo, logado);
 		URI uri = uriBuilder.path("/campanha/periodocompra/{idCampanha}").buildAndExpand(periodo.getCampanhaPai().getId()).toUri();
 		return ResponseEntity.created(uri).body(new CampanhaDto(periodo.getCampanhaPai()));
 	}
