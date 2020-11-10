@@ -27,7 +27,7 @@ public class EmpresaService {
 	public void validaEmpresaImplantada(String cnpjEmpresa) throws EmpresaServiceException {
 		Optional<Empresa> empresaFind = empresaRepository.findByCnpj(new BigInteger(cnpjEmpresa));
 		if (empresaFind.isPresent()) {
-			throw new EmpresaServiceException("Empresa ja cadastrada", "Empresa ja cadastrada");
+			throw new EmpresaServiceException("Empresa já cadastrada", "Empresa já cadastrada");
 		}
 	}
 	

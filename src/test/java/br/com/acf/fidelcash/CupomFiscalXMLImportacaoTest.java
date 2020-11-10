@@ -72,9 +72,9 @@ public class CupomFiscalXMLImportacaoTest {
 			UtilServiceException, ParserConfigurationException, SAXException, ParseException {
 
 		// move arquivos para a pasta de de upload da implantacao
-		Path dir = Paths.get("C:\\Projetos\\fidelcash\\arquivos-xml\\99999999999999\\implantacao");
+		Path dir = Paths.get("D:\\Projetos\\fidelcash\\arquivos-xml\\99999999999999\\implantacao");
 		DirectoryStream<Path> directoryStream = Files.newDirectoryStream(dir, "*.xml*");
-		String diretorioDestino = "C:\\Projetos\\fidelcash\\arquivos-xml\\99999999999999\\implantacao\\upload";
+		String diretorioDestino = "D:\\Projetos\\fidelcash\\arquivos-xml\\99999999999999\\implantacao\\upload";
 		for (Path arquivoOrigem : directoryStream) {
 			String stringArquivoDestino = diretorioDestino + "\\" + arquivoOrigem.getFileName();
 			Path arquivoDestino = FileSystems.getDefault().getPath(stringArquivoDestino);
@@ -91,9 +91,9 @@ public class CupomFiscalXMLImportacaoTest {
 		assertEquals("PRIME PREMIUM MEDIO", produto.get().getDescricao());
 
 		// move arquivos para a pasta de de upload da importacao
-		dir = Paths.get("C:\\Projetos\\fidelcash\\arquivos-xml\\99999999999999\\importacao");
+		dir = Paths.get("D:\\Projetos\\fidelcash\\arquivos-xml\\99999999999999\\importacao");
 		directoryStream = Files.newDirectoryStream(dir, "*.xml*");
-		diretorioDestino = "C:\\Projetos\\fidelcash\\arquivos-xml\\99999999999999\\importacao\\upload";
+		diretorioDestino = "D:\\Projetos\\fidelcash\\arquivos-xml\\99999999999999\\importacao\\upload";
 		for (Path arquivoOrigem : directoryStream) {
 			String stringArquivoDestino = diretorioDestino + "\\" + arquivoOrigem.getFileName();
 			Path arquivoDestino = FileSystems.getDefault().getPath(stringArquivoDestino);
@@ -107,7 +107,7 @@ public class CupomFiscalXMLImportacaoTest {
 
 		@SuppressWarnings("unused")
 		List<ImportacaoDto> importacao = new ArrayList<ImportacaoDto>();
-		importacao = cfImporta.importarXml();
+           		importacao = cfImporta.importarXml();
 		
 		
 		BigInteger cpf = new BigInteger("16368579811");

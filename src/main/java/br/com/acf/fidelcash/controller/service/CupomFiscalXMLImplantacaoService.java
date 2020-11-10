@@ -75,8 +75,8 @@ public class CupomFiscalXMLImplantacaoService {
 			
 			Optional<Util> diretorioPadrao = utilService.findByEmpresaAndUtilidade(null, "DIRETORIO_PADRAO");
 			if(diretorioPadrao.isEmpty()) {
-				utilService.criarDiretorio("C:\\Projetos\\fidelcash\\arquivos-xml");
-				utilService.criarUtilidadeImplantacao("C:\\Projetos\\fidelcash\\arquivos-xml", "DIRETORIO_PADRAO", "PASTA QUE ARMAZENARÁ TODA A ESTRUTURA DE ARQUIVOS XML DAS EMPRESAS");
+				utilService.criarDiretorio("D:\\Projetos\\fidelcash\\arquivos-xml");
+				utilService.criarUtilidadeImplantacao("D:\\Projetos\\fidelcash\\arquivos-xml", "DIRETORIO_PADRAO", "PASTA QUE ARMAZENARÁ TODA A ESTRUTURA DE ARQUIVOS XML DAS EMPRESAS");
 				diretorioPadrao = utilService.findByEmpresaAndUtilidade(null, "DIRETORIO_PADRAO");
 			}
 			String diretorioEmpresa = diretorioPadrao.get().getPasta()+"\\"+cnpjEmpresa+"\\implantacao\\upload";
