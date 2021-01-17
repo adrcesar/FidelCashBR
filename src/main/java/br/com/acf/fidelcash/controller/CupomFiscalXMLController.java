@@ -1,25 +1,31 @@
 package br.com.acf.fidelcash.controller;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.Valid;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.xml.sax.SAXException;
 
 import br.com.acf.fidelcash.controller.dto.ImportacaoDto;
 import br.com.acf.fidelcash.controller.dto.UtilDtoImplantacao;
+import br.com.acf.fidelcash.controller.form.ImplantacaoForm;
 import br.com.acf.fidelcash.controller.service.CupomFiscalXMLImplantacaoService;
 import br.com.acf.fidelcash.controller.service.CupomFiscalXMLImportacaoService;
 import br.com.acf.fidelcash.controller.service.exception.UtilServiceException;
+import br.com.acf.fidelcash.modelo.Usuario;
 import br.com.acf.fidelcash.modelo.exception.CupomFiscalXMLException;
 
 @RestController
@@ -32,10 +38,13 @@ public class CupomFiscalXMLController {
 	@Autowired
 	private CupomFiscalXMLImportacaoService cfImporta;	
 	
-	@PostMapping("/implantacao/{implantacaoEmpresa}")
-	public ResponseEntity<UtilDtoImplantacao> implantarFidel(@PathVariable String implantacaoEmpresa) { // poderia retornar ResponseEntity<String>
+	@PostMapping("/implantacao")
+	public ResponseEntity<UtilDtoImplantacao> implantarFidel(
+			                                   @RequestBody @Valid ImplantacaoForm form,
+			                                   @AuthenticationPrincipal Usuario logado) { 
 		try {
-			UtilDtoImplantacao utilDto = cfImplementa.implantarFidelCash(implantacaoEmpresa);
+			BigInteger cnpj = form.getCnpj();
+			UtilDtoImplantacao utilDto = cfImplementa.implantarFidelCash(cnpj, logado);
 			if(utilDto.isErro()) {
 				return ResponseEntity.badRequest().body(utilDto);
 			} else {

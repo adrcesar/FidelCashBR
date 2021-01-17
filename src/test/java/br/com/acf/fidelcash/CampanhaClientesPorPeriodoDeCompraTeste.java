@@ -93,7 +93,7 @@ public class CampanhaClientesPorPeriodoDeCompraTeste {
 			// implantar
 			BigInteger cnpj = new BigInteger("99999999999999");
 			@SuppressWarnings("unused")
-			UtilDtoImplantacao utilDto = cfImplementa.implantarFidelCash(cnpj.toString());
+			UtilDtoImplantacao utilDto = cfImplementa.implantarFidelCash(cnpj);
 
 			// move arquivos para a pasta de de upload da importacao
 			dir = Paths.get("C:\\Projetos\\fidelcash\\arquivos-xml\\99999999999999\\importacao");

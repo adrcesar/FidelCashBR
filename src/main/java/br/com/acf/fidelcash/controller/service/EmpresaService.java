@@ -24,8 +24,8 @@ public class EmpresaService {
 	@Autowired
 	private EnderecoService enderecoService;
 	
-	public void validaEmpresaImplantada(String cnpjEmpresa) throws EmpresaServiceException {
-		Optional<Empresa> empresaFind = empresaRepository.findByCnpj(new BigInteger(cnpjEmpresa));
+	public void validaEmpresaImplantada(BigInteger cnpjEmpresa) throws EmpresaServiceException {
+		Optional<Empresa> empresaFind = empresaRepository.findByCnpj(cnpjEmpresa);
 		if (empresaFind.isPresent()) {
 			throw new EmpresaServiceException("Empresa já cadastrada", "Empresa já cadastrada");
 		}

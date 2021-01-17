@@ -33,13 +33,15 @@ public class UsuarioService {
 	public void verificaPerfil(Usuario logado, String string) throws UsuarioServiceException {
 		String tipoPerfil = null;
 		for(GrantedAuthority perfil :  logado.getAuthorities()) {
+			System.out.println("PERFIL: " + perfil.getAuthority());
 			if (perfil.getAuthority().equals("ADMINISTRADOR")){
 				tipoPerfil = perfil.getAuthority();
 				break;
 			}
 		}
+		
 		if(tipoPerfil == null) {
-			throw new UsuarioServiceException("Usuário não tem permissão para cadastrar campanha.", "Usuário não tem permissão para cadastrar campanha.");
+			throw new UsuarioServiceException("Usuário não tem permissão para realizar esta operação.", "Usuário não tem permissão para realizar esta operação.");
 		}
 		
 	}

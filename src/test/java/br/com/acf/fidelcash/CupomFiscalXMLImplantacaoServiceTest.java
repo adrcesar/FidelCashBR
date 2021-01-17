@@ -101,7 +101,7 @@ public class CupomFiscalXMLImplantacaoServiceTest {
 		// implantar
 		BigInteger cnpj = new BigInteger("99999999999999");
 		@SuppressWarnings("unused")
-		UtilDtoImplantacao utilDto = cfImplementa.implantarFidelCash(cnpj.toString());
+		UtilDtoImplantacao utilDto = cfImplementa.implantarFidelCash(cnpj);
 
 		Optional<Empresa> empresa = empresaService.findByCnpj(cnpj);
 		Optional<Produto> produto = produtoService.findByEmpresaAndCodigoProduto(empresa.get(), "29");
@@ -121,7 +121,7 @@ public class CupomFiscalXMLImplantacaoServiceTest {
 		// implantar
 		BigInteger cnpj = new BigInteger("99999999999999");
 		@SuppressWarnings("unused")
-		UtilDtoImplantacao utilDto = cfImplementa.implantarFidelCash(cnpj.toString());
+		UtilDtoImplantacao utilDto = cfImplementa.implantarFidelCash(cnpj);
 
 		Optional<Empresa> empresa = empresaService.findByCnpj(cnpj);
 		Optional<Produto> produto = produtoService.findByEmpresaAndCodigoProduto(empresa.get(), "29");
@@ -132,7 +132,7 @@ public class CupomFiscalXMLImplantacaoServiceTest {
 				   "D:\\Projetos\\fidelcash\\arquivos-xml\\99999999999999\\implantacao\\upload");
 		// implantar
 		Exception exception = assertThrows(EmpresaServiceException.class, () -> {
-			cfImplementa.implantarFidelCash(cnpj.toString());
+			cfImplementa.implantarFidelCash(cnpj);
 		});
 		
 		assertTrue(exception.getMessage().contains("Empresa já cadastrada"));
@@ -153,7 +153,7 @@ public class CupomFiscalXMLImplantacaoServiceTest {
 		BigInteger cnpj = new BigInteger("26501145000160");
 
 		Exception exception = assertThrows(CupomFiscalXMLException.class, () -> {
-			cfImplementa.implantarFidelCash(cnpj.toString());
+			cfImplementa.implantarFidelCash(cnpj);
 		});
 
 		assertTrue(exception.getMessage().contains("Nenhum arquivo xml encontrado"));
@@ -173,7 +173,7 @@ public class CupomFiscalXMLImplantacaoServiceTest {
 		BigInteger cnpj = new BigInteger("26501145000160");
 
 		Exception exception = assertThrows(CupomFiscalXMLException.class, () -> {
-			cfImplementa.implantarFidelCash(cnpj.toString());
+			cfImplementa.implantarFidelCash(cnpj);
 		});
 		
 		assertTrue(exception.getMessage().contains("CNPJ informado é diferente do CNPJ do arquivo"));

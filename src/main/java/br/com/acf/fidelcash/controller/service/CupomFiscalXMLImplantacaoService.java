@@ -27,6 +27,7 @@ import br.com.acf.fidelcash.controller.dto.UtilDtoImplantacao;
 import br.com.acf.fidelcash.controller.service.exception.EmpresaServiceException;
 import br.com.acf.fidelcash.controller.service.exception.ProdutoServiceException;
 import br.com.acf.fidelcash.controller.service.exception.TipoClienteServiceException;
+import br.com.acf.fidelcash.controller.service.exception.UsuarioServiceException;
 import br.com.acf.fidelcash.controller.service.exception.UtilServiceException;
 import br.com.acf.fidelcash.modelo.CupomFiscalXML;
 import br.com.acf.fidelcash.modelo.Empresa;
@@ -67,10 +68,14 @@ public class CupomFiscalXMLImplantacaoService {
 	@Autowired
 	private CupomFiscalXMLService cfXMLService;
 	
+	
+	
 	@Transactional(rollbackFor = { Exception.class })
-	public UtilDtoImplantacao implantarFidelCash(String cnpjEmpresa)
-			throws CupomFiscalXMLException, EmpresaServiceException, UtilServiceException {
+	public UtilDtoImplantacao implantarFidelCash(BigInteger cnpjEmpresa, Usuario logado)
+			throws CupomFiscalXMLException, EmpresaServiceException, UtilServiceException, UsuarioServiceException {
 		try {
+			usuarioService.verificaPerfil(logado, "ADMINISTRADOR");
+			
 			empresaService.validaEmpresaImplantada(cnpjEmpresa);
 			
 			Optional<Util> diretorioPadrao = utilService.findByEmpresaAndUtilidade(null, "DIRETORIO_PADRAO");
@@ -82,19 +87,19 @@ public class CupomFiscalXMLImplantacaoService {
 			String diretorioEmpresa = diretorioPadrao.get().getPasta()+"\\"+cnpjEmpresa+"\\implantacao\\upload";
 			utilService.criarDiretorio(diretorioEmpresa);
 			utilService.criarUtilidadeImplantacao(diretorioEmpresa,
-												  cnpjEmpresa,
+												  cnpjEmpresa.toString(),
 					                              "ARMAZENA OS ARQUIVOS XML QUE GERARAO A IMPLANTACAO DA EMPRESA");
-			String pasta = utilService.getPastaXML(cnpjEmpresa);
+			String pasta = utilService.getPastaXML(cnpjEmpresa.toString());
 			Map<Path, String> mapArquivos = implantarEmpresaByXml(pasta, cnpjEmpresa);
-			Optional<Empresa> empresaFind = empresaService.findByCnpj(new BigInteger(cnpjEmpresa));
+			Optional<Empresa> empresaFind = empresaService.findByCnpj(cnpjEmpresa);
 			criarDiretoriosDeImplantacao(pasta, empresaFind.get());
 			movimentacaoDeArquivos(mapArquivos);
 			criarDiretoriosDeImportacao(pasta, empresaFind.get());
-			Optional<Util> util = utilService.findByEmpresaAndUtilidade(null, cnpjEmpresa);
+			Optional<Util> util = utilService.findByEmpresaAndUtilidade(null, cnpjEmpresa.toString());
 			Optional<TipoCliente> tipoCliente = tipoClienteService.findByEmpresaAndDescricao(empresaFind.get(), "PADRAO");
 			List<Produto> produtos = produtoService.findByEmpresa(empresaFind.get());
 			//
-			setUsuarioAdministrador(empresaFind.get());
+			setUsuarioGerenteDeLoja(empresaFind.get());
 			//
 			return utilService.dadosDaImplantacao(util, tipoCliente, produtos );
 		} catch (IOException | ParseException | ParserConfigurationException | SAXException ex) {
@@ -102,22 +107,28 @@ public class CupomFiscalXMLImplantacaoService {
 		}
 	}
 	
-	private void setUsuarioAdministrador(Empresa empresa) {
+	private void setUsuarioGerenteDeLoja(Empresa empresa) {
 		Usuario usuario = new Usuario();
 		usuario.setEmail("adrcesar@gmail.com");
-		usuario.setNome("ADMINISTRADOR");
+		usuario.setNome("GERENTE DA LOJA "+ empresa.getId());
+		
 		usuario.setSenha("$2a$10$zLiEBFy0Qm2EkCm/h5neAuk8ha2QkzBkM96Nglyb1i2U0PtaaeyiK");
 		usuario.setSituacao(SituacaoUsuario.ATIVO);
-		usuario.setUsuario("castro");
+		usuario.setUsuario("lj_" + empresa.getId());
 		usuarioService.save(usuario);
 		
-		Perfil perfil = new Perfil();
-		perfil.setNome("ADMINISTRADOR");
-		perfilService.save(perfil);
+		Optional<Perfil> perfilFind = perfilService.findByNome("GERENTE DE LOJA");
+		if(perfilFind.isEmpty()) {
+			Perfil perfil = new Perfil();
+			perfil.setNome("GERENTE DE LOJA");
+			perfilService.save(perfil);
+			perfilFind = perfilService.findByNome("GERENTE DE LOJA");
+		}
+		
 		
 		UsuarioPerfil usuarioPerfil = new UsuarioPerfil();
 		usuarioPerfil.setEmpresa(empresa);
-		usuarioPerfil.setPerfil(perfil);
+		usuarioPerfil.setPerfil(perfilFind.get());
 		usuarioPerfil.setUsuario(usuario);
 		usuarioPerfil.setSituacao(SituacaoUsuarioPerfil.ATIVO);
 		usuarioPerfilService.save(usuarioPerfil);
@@ -223,7 +234,7 @@ public class CupomFiscalXMLImplantacaoService {
 		}
 	}
 	
-	private Map<Path, String> implantarEmpresaByXml(String directory, String cnpjEmpresa) throws CupomFiscalXMLException {
+	private Map<Path, String> implantarEmpresaByXml(String directory, BigInteger cnpjEmpresa) throws CupomFiscalXMLException {
 		try {
 			Map<Path, String> mapArquivo = new HashMap<>();
 			Path dir = Paths.get(directory);
@@ -252,14 +263,14 @@ public class CupomFiscalXMLImplantacaoService {
 		}
 	}
 
-	private void GerarDadosByXML(Path arquivo, String cnpjEmpresa)
+	private void GerarDadosByXML(Path arquivo, BigInteger cnpjEmpresa)
 			throws CupomFiscalXMLException, EmpresaServiceException, TipoClienteServiceException, ProdutoServiceException {
 		try {
 			String xml = arquivo.toString();
 			CupomFiscalXML cfXML = cfXMLService.GerarDadosByXml(xml);
 			Empresa empresaXML = cfXML.getEmpresa();
 			List<Produto> produtos = cfXML.getProdutos();
-			validaCnpjXml(xml, new BigInteger(cnpjEmpresa), empresaXML.getCnpj());
+			validaCnpjXml(xml, cnpjEmpresa, empresaXML.getCnpj());
 			Empresa empresa = empresaService.setEmpresa(empresaXML, cfXML);
 			tipoClienteService.setTipoCliente(empresa);
 			for (int i = 0; i < produtos.size(); i++) {

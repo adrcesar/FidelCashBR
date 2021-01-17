@@ -1,0 +1,1 @@
+https://stackoverflow.com/questions/42309708/create-own-react-route-class-in-typescript

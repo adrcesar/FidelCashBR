@@ -84,7 +84,7 @@ public class CupomFiscalXMLImportacaoTest {
 		// implantar
 		BigInteger cnpj = new BigInteger("99999999999999");
 		@SuppressWarnings("unused")
-		UtilDtoImplantacao utilDto = cfImplementa.implantarFidelCash(cnpj.toString());
+		UtilDtoImplantacao utilDto = cfImplementa.implantarFidelCash(cnpj);
 
 		Optional<Empresa> empresa = empresaService.findByCnpj(cnpj);
 		Optional<Produto> produto = produtoService.findByEmpresaAndCodigoProduto(empresa.get(), "29");
