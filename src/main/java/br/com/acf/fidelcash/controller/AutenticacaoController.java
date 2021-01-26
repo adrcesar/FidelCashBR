@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import br.com.acf.fidelcash.config.Security.TokenService;
 import br.com.acf.fidelcash.controller.dto.TokenDto;
 import br.com.acf.fidelcash.controller.form.LoginForm;
+import br.com.acf.fidelcash.controller.service.UsuarioService;
 
 
 
@@ -29,6 +30,9 @@ public class AutenticacaoController {
 	@Autowired
 	private TokenService tokenService;
 	
+	@Autowired
+	private UsuarioService usuarioService;
+	
 	@PostMapping
 	public ResponseEntity<TokenDto> autenticar(@RequestBody @Valid LoginForm form) {
 		UsernamePasswordAuthenticationToken dadosLogin = form.converter();
@@ -36,6 +40,8 @@ public class AutenticacaoController {
 			Authentication authentication = authManager.authenticate(dadosLogin);
 			String token = tokenService.gerarToken(authentication);
 			System.out.println(token);
+			
+			
 			return ResponseEntity.ok(new TokenDto(token, "Bearer"));
 		} catch (AuthenticationException e) {
 			return ResponseEntity.badRequest().build();

@@ -10,7 +10,7 @@ interface User {
 
 interface AuthContextData {
     signed: boolean;
-    user: User | null;
+    user: User | null; 
     signIn(token: string, name: string, email: string): Promise<void>; /* não recebe nenhum parâmetro e o retorno é uma promise que não tem retorno (void), */
     signOut(): void;
 }

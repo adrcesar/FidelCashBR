@@ -16,7 +16,8 @@ public class UsuarioService {
 	
 	@Autowired
 	private UsuarioRepository usuarioRepository;
-
+	
+	
 	public Optional<Usuario> findByUsuario(String usuario) {
 		return usuarioRepository.findByUsuario(usuario);
 	}
@@ -43,8 +44,9 @@ public class UsuarioService {
 		if(tipoPerfil == null) {
 			throw new UsuarioServiceException("Usuário não tem permissão para realizar esta operação.", "Usuário não tem permissão para realizar esta operação.");
 		}
-		
 	}
+	
+	
 	
 	
 
