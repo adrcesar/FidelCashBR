@@ -6,12 +6,13 @@ import api from "../services/api";
 interface User {
     name: string;
     email: string;
+    perfil: string;
 }
 
 interface AuthContextData {
     signed: boolean;
     user: User | null; 
-    signIn(token: string, name: string, email: string): Promise<void>; /* não recebe nenhum parâmetro e o retorno é uma promise que não tem retorno (void), */
+    signIn(token: string, name: string, email: string, perfil: string): Promise<void>; /* não recebe nenhum parâmetro e o retorno é uma promise que não tem retorno (void), */
     signOut(): void;
 }
 
@@ -37,6 +38,7 @@ const AuthProvider: React.FC = ({ children }) => {
         async function loadStorageData() {
             const storagedUser = localStorage.getItem('@FIDELCASH/USER');
             const storagedToken = localStorage.getItem('@FIDELCASH/TOKEN');
+            const storagedPerfil = localStorage.getItem('@FIDELCASH/PERFIL');
             console.log("auth " + storagedToken);
             if (storagedUser && storagedToken) {
                 setUser(JSON.parse(storagedUser));
@@ -50,14 +52,15 @@ const AuthProvider: React.FC = ({ children }) => {
         loadStorageData(); //NAO É POSSÍVEL USAR ASYNC NO PARAMETRO DA USEeFFECT, POR ISSO A CRIACAO DA FUNCTION E A CHAMADA DELA 
     });
 
-    async function signIn(token: string, name: string, email: string ) {
-        const response = await auth.signIn(token, name, email);
+    async function signIn(token: string, name: string, email: string, perfil: string ) {
+        const response = await auth.signIn(token, name, email, perfil);
         setUser(response.user);
 
         api.defaults.headers.Authorization = `Baerer ${response.token}`;
 
         localStorage.setItem('@FIDELCASH/USER', JSON.stringify(response.user));
         localStorage.setItem('@FIDELCASH/TOKEN', JSON.stringify(response.token));
+        localStorage.setItem('@FIDELCASH/PERFIL', JSON.stringify(response.user.perfil));
 
         
     }
@@ -65,6 +68,7 @@ const AuthProvider: React.FC = ({ children }) => {
     function signOut() {
         localStorage.removeItem('@FIDELCASH/USER');
         localStorage.removeItem('@FIDELCASH/TOKEN');
+        localStorage.removeItem('@FIDELCASH/PERFIL');
         setUser(null);
     }
 

@@ -194,10 +194,11 @@ function DashBoard(props: DashBoardProps) {
                             variant="temporary"
                             open={mobileOpen}
                             onClose={handleDrawerToggle}
+                            perfil={user?.perfil}
                         />
                     </Hidden>
                     <Hidden xsDown implementation="css">
-                        <Navigator PaperProps={{ style: { width: drawerWidth } }} />
+                        <Navigator PaperProps={{ style: { width: drawerWidth } }} perfil={user?.perfil}/>
                     </Hidden>
                 </nav>
                 <div className={classes.app}>

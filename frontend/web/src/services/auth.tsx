@@ -3,10 +3,11 @@ interface Response {
     user: {
         name: string,
         email: string,
+        perfil: string,
     };
 }
 
-export function signIn(token: string, name:  string, email: string): Promise<Response> {
+export function signIn(token: string, name:  string, email: string, perfil: string): Promise<Response> {
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve({
@@ -14,6 +15,7 @@ export function signIn(token: string, name:  string, email: string): Promise<Res
           user: {
             name: name, /* "Thiago", */
             email: email, /* "thiagomarinho@rockeseat.com.br", */
+            perfil: perfil,
           },
         });
       }, 2000);

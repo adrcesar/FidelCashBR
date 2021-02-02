@@ -71,7 +71,7 @@ const SignIn: React.FC = () => {
     async function handleSign() {
         api.post("/auth", { usuario, senha })
             .then(response => {
-                signIn(response.data.token, usuario, senha);
+                signIn(response.data.token, usuario, senha, response.data.perfil);
             })
             .catch(() => {
                 setMensagem({

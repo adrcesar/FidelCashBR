@@ -84,16 +84,16 @@ const styles = (theme: Theme) =>
     },
   });
 
-export interface NavigatorProps extends Omit<DrawerProps, 'classes'>, WithStyles<typeof styles> {}
+export interface NavigatorProps extends Omit<DrawerProps, 'classes'>, WithStyles<typeof styles> {perfil: string | undefined;}
 
 function Navigator(props: NavigatorProps) {
-  const { classes, ...other } = props;
+  const { classes, perfil, ...other } = props;
 
   return (
     <Drawer variant="permanent" {...other}>
       <List disablePadding>
         <ListItem className={clsx(classes.firebase, classes.item, classes.itemCategory)}>
-          Paperbase
+         {/*  Paperbase */} {perfil}
         </ListItem>
         <ListItem className={clsx(classes.item, classes.itemCategory)}>
           <ListItemIcon className={classes.itemIcon}>
