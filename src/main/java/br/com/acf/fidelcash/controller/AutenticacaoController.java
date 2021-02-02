@@ -39,11 +39,12 @@ public class AutenticacaoController {
 		try {
 			Authentication authentication = authManager.authenticate(dadosLogin);
 			String token = tokenService.gerarToken(authentication);
+			String perfil = usuarioService.findPerfilByUsuario(form.getUsuario());
 			System.out.println(token);
 			
 			
-			return ResponseEntity.ok(new TokenDto(token, "Bearer"));
-		} catch (AuthenticationException e) {
+			return ResponseEntity.ok(new TokenDto(token, "Bearer", perfil));
+		} catch (Exception e) {
 			return ResponseEntity.badRequest().build();
 		}
 	}

@@ -17,6 +17,9 @@ public class UsuarioService {
 	@Autowired
 	private UsuarioRepository usuarioRepository;
 	
+	@Autowired
+	private UsuarioPerfilService usuarioPerfilService;
+	
 	
 	public Optional<Usuario> findByUsuario(String usuario) {
 		return usuarioRepository.findByUsuario(usuario);
@@ -28,6 +31,7 @@ public class UsuarioService {
 
 	public void save(Usuario usuario) {
 		usuarioRepository.save(usuario);
+		
 		
 	}
 
@@ -45,6 +49,37 @@ public class UsuarioService {
 			throw new UsuarioServiceException("Usuário não tem permissão para realizar esta operação.", "Usuário não tem permissão para realizar esta operação.");
 		}
 	}
+
+	public String findPerfilByUsuario(String usuario) throws UsuarioServiceException  {
+		Optional<Usuario> usuarioFind = findByUsuario(usuario);
+		String perfil = null, perfinFind; 
+		
+		perfinFind = usuarioPerfilService.findPerfilByUsuarioTipo(usuarioFind.get(), "OPERADOR DE LOJA");
+		if(perfinFind != null)
+			perfil = perfinFind;
+		
+		perfinFind = usuarioPerfilService.findPerfilByUsuarioTipo(usuarioFind.get(), "GERENTE DE LOJA");
+		if(perfinFind != null)
+			perfil = perfinFind;
+		
+		perfinFind = usuarioPerfilService.findPerfilByUsuarioTipo(usuarioFind.get(), "REDE");
+		if(perfinFind != null)
+			perfil = perfinFind;
+		
+		perfinFind = usuarioPerfilService.findPerfilByUsuarioTipo(usuarioFind.get(), "ADMINISTRADOR");
+		if(perfinFind != null)
+			perfil = perfinFind;
+		
+		if(perfil == null) {
+			throw new UsuarioServiceException("Usuário não possui nenhum perfil cadastrado.", "Usuário não possui nenhum perfil cadastrado.");
+		}
+		
+		return perfil;
+	}
+	
+	
+	
+	
 	
 	
 	
