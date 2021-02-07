@@ -36,13 +36,20 @@ const AuthProvider: React.FC = ({ children }) => {
     useEffect(() => {
 
         async function loadStorageData() {
+            //localStorage.removeItem('@FIDELCASH/USER');
+            //localStorage.removeItem('@FIDELCASH/TOKEN');
+            //localStorage.removeItem('@FIDELCASH/PERFIL');
+            //setUser(null);
+            
             const storagedUser = localStorage.getItem('@FIDELCASH/USER');
             const storagedToken = localStorage.getItem('@FIDELCASH/TOKEN');
-            const storagedPerfil = localStorage.getItem('@FIDELCASH/PERFIL');
+            
             console.log("auth " + storagedToken);
             if (storagedUser && storagedToken) {
                 setUser(JSON.parse(storagedUser));
                 api.defaults.headers.Authorization = `Baerer ${storagedToken}`;
+            } else {
+                console.log('muitos loops meu deus');
             }
 
         }

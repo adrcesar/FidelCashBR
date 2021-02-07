@@ -107,7 +107,7 @@ function Header(props: HeaderProps) {
         <Toolbar>
           <Grid container alignItems="center" spacing={1}>
             <Grid item xs>
-              <Typography color="inherit" variant="h6" component="h1">
+              <Typography color="inherit" variant="body2" >
                 importe arquivos xml para gerar informações da empresa e dos produtos
               </Typography>
             </Grid>

@@ -10,6 +10,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import HomeIcon from '@material-ui/icons/Home';
 import PeopleIcon from '@material-ui/icons/People';
+import GroupIcon from '@material-ui/icons/Group';
 import DnsRoundedIcon from '@material-ui/icons/DnsRounded';
 import PermMediaOutlinedIcon from '@material-ui/icons/PhotoSizeSelectActual';
 import PublicIcon from '@material-ui/icons/Public';
@@ -53,14 +54,16 @@ interface CategoriaProps {
   children: ChildrenProps[]
 }  
 
-let categories: CategoriaProps[] = [];
 
+let categories: CategoriaProps[] = [];
 
 const perfilAdmin: CategoriaProps = {
   id: 'Administrador',
     children: [
-      { id: 'Nova Empresa', icon: <PermMediaOutlinedIcon />, active: true }, 
-    ], 
+      { id: 'Empresa', icon: <PermMediaOutlinedIcon />, /* active: true */ }, 
+      { id: 'Rede de Empresas', icon: <GroupIcon />, /* active: true */ }, 
+    ],
+    
 };
 
 const perfilOperador: CategoriaProps = {
@@ -70,22 +73,16 @@ const perfilOperador: CategoriaProps = {
     ],   
 };
 
-function createMenuByPerfil(perfil: string | undefined) {
+ function createMenuByPerfil(perfil: string | undefined) {
+  
   if (perfil === "ADMINISTRADOR") {
-    console.log("oiiiiii88888888");
-    console.log(perfilAdmin);
-    console.log(perfilOperador);
     
+    categories = [];
     categories.push(perfilAdmin);
-    console.log("oiiiii9999999");
-    console.log(categories);
     categories.push(perfilOperador);
-    console.log(categories);
-    
-    
   }
   
-}
+} 
 
 
 
@@ -137,10 +134,9 @@ export interface NavigatorProps extends Omit<DrawerProps, 'classes'>, WithStyles
 function Navigator(props: NavigatorProps) {
   const { classes, perfil, ...other } = props;
 
-  createMenuByPerfil(perfil);
-
   
-
+  createMenuByPerfil(perfil);
+ 
 
   return (
     <Drawer variant="permanent" {...other}>
