@@ -45,13 +45,13 @@ const styles = (theme: Theme) =>
   });
 
 interface HeaderProps extends WithStyles<typeof styles> {
-  onDrawerToggle: () => void;
+  
   usuario: string | undefined;
 
 }
 
 function Header(props: HeaderProps) {
-  const { classes, onDrawerToggle, usuario } = props;
+  const { classes,  usuario } = props;
 
   return (
     <React.Fragment>
