@@ -2,6 +2,7 @@ import React from 'react';
 import {
     createMuiTheme,
     createStyles,
+    makeStyles,
     ThemeProvider,
     withStyles,
     WithStyles,
@@ -19,143 +20,50 @@ import Toast from '../../Components/Toast';
 import Avatar from '@material-ui/core/Avatar';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import TextField from '@material-ui/core/TextField';
+import { Box } from '@material-ui/core';
 
-let theme = createMuiTheme({
-    palette: {
-        primary: {
-            light: '#63ccff',
-            main: '#009be5',
-            dark: '#006db3',
-        },
-    },
-    typography: {
-        h5: {
-            fontWeight: 500,
-            fontSize: 26,
-            letterSpacing: 0.5,
-        },
-    },
-    shape: {
-        borderRadius: 8,
-    },
-    props: {
-        MuiTab: {
-            disableRipple: true,
-        },
-    },
-    mixins: {
-        toolbar: {
-            minHeight: 48,
-        },
-    },
-});
-
-theme = {
-    ...theme,
-    overrides: {
-        MuiDrawer: {
-            paper: {
-                backgroundColor: '#18202c',
-            },
-        },
-        MuiButton: {
-            label: {
-                textTransform: 'none',
-            },
-            contained: {
-                boxShadow: 'none',
-                '&:active': {
-                    boxShadow: 'none',
-                },
-            },
-        },
-        MuiTabs: {
-            root: {
-                marginLeft: theme.spacing(1),
-            },
-            indicator: {
-                height: 3,
-                borderTopLeftRadius: 3,
-                borderTopRightRadius: 3,
-                backgroundColor: theme.palette.common.white,
-            },
-        },
-        MuiTab: {
-            root: {
-                textTransform: 'none',
-                margin: '0 16px',
-                minWidth: 0,
-                padding: 0,
-                [theme.breakpoints.up('md')]: {
-                    padding: 0,
-                    minWidth: 0,
-                },
-            },
-        },
-        MuiIconButton: {
-            root: {
-                padding: theme.spacing(1),
-            },
-        },
-        MuiTooltip: {
-            tooltip: {
-                borderRadius: 4,
-            },
-        },
-        MuiDivider: {
-            root: {
-                backgroundColor: '#404854',
-            },
-        },
-        MuiListItemText: {
-            primary: {
-                fontWeight: theme.typography.fontWeightMedium,
-            },
-        },
-        MuiListItemIcon: {
-            root: {
-                color: 'inherit',
-                marginRight: 0,
-                '& svg': {
-                    fontSize: 20,
-                },
-            },
-        },
-        MuiAvatar: {
-            root: {
-                width: 32,
-                height: 32,
-            },
-        },
-    },
-};
-
-const drawerWidth = 256;
-
-const styles = createStyles({
+const useStyles = makeStyles((theme) => ({
     root: {
-        display: 'flex',
-        minHeight: '100vh',
+      height: '100vh',
+      backgroundColor: theme.palette.background.default,
+    },
+    teste: {
+      left: 245,
+    },
+    appBar: {
+      boxShadow: 'none',
+      zIndex: theme.zIndex.drawer + 1,
+    },
+    logo: {
+      height: 25,
     },
     drawer: {
-        [theme.breakpoints.up('sm')]: {
-            width: drawerWidth,
-            flexShrink: 0,
-        },
+      width: 240,
+      flexShrink: 0,
     },
-    app: {
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
+    drawerPaper: {
+      width: 240,
+      borderRight: 'none',
     },
-    main: {
-        flex: 1,
-        padding: theme.spacing(6, 4),
-        background: '#eaeff1',
+    menuIcon: {
+      paddingRight: theme.spacing(5),
+      paddingLeft: theme.spacing(6),
     },
-    footer: {
-        padding: theme.spacing(2),
-        background: '#eaeff1',
+    icons: {
+      paddingRight: theme.spacing(5),
+    },
+    grow: {
+      flexGrow: 1,
+    },
+    listItemText: {
+      fontSize: 14,
+    },
+    listItem: {
+      paddingTop: 4,
+      paddingBottom: 4,
+    },
+    subheader: {
+      textTransform: 'uppercase',
     },
     paper: {
         marginTop: theme.spacing(8),
@@ -171,19 +79,10 @@ const styles = createStyles({
         width: '100%', // Fix IE 11 issue.
         marginTop: theme.spacing(1),
     },
-    submit: {
-        margin: theme.spacing(3, 0, 2),
-    },
-});
-
-export interface DashBoardProps extends WithStyles<typeof styles> { }
-
-function DashBoard(props: DashBoardProps) {
-    const { classes } = props;
-    const [mobileOpen, setMobileOpen] = React.useState(false);
-
-
-
+  }));
+  
+function DashBoard() {
+    const classes = useStyles();
     const { user, signOut } = useAuth();
 
     function handleSignOut() {
@@ -191,27 +90,12 @@ function DashBoard(props: DashBoardProps) {
     }
 
     return (
-        <ThemeProvider theme={theme}>
-            <div className={classes.root}>
-                <CssBaseline />
-                <nav className={classes.drawer}>
-                    {/* <Hidden smUp implementation="js">
-                        <Navigator
-                            PaperProps={{ style: { width: drawerWidth } }}
-                            variant="temporary"
-                            open={mobileOpen}
-                            onClose={handleDrawerToggle}
-                            perfil={user?.perfil}
-                        />
-                    </Hidden> */}
-                    {/* <Hidden xsDown implementation="css"> */}
-                    <Navigator PaperProps={{ style: { width: drawerWidth } }} perfil={user?.perfil} />
-                    {/* </Hidden> */}
-                </nav>
-                <div className={classes.app}>
-                    <Header usuario={user?.name} />
-                    <main className={classes.main}>
-                        <h1>Logado</h1>
+        <div className={classes.root}>
+            <Header usuario={user?.name} />  
+            <Box display='flex'>
+                <Navigator perfil={user?.perfil} />
+                <Box p={8}>
+                <h1>Logado</h1>
                         {user?.name}
                         <button title="Sign Out" onClick={handleSignOut} />
 
@@ -259,17 +143,16 @@ function DashBoard(props: DashBoardProps) {
                                 </form>
                             </div>
                             
-                        </Container>
+                        </Container>    
+                </Box>
 
-
-                    </main>
-                    <footer className={classes.footer}>
-                        rodapé
-                    </footer>
-                </div>
-            </div>
-        </ThemeProvider>
+            </Box>
+        </div>    
+        
+        
+        
+        
     );
 }
 
-export default withStyles(styles)(DashBoard);
+export default DashBoard;

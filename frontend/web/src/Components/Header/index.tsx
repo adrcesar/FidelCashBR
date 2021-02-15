@@ -1,121 +1,135 @@
 import React from 'react';
-import AppBar from '@material-ui/core/AppBar';
-import Avatar from '@material-ui/core/Avatar';
-import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
-import HelpIcon from '@material-ui/icons/Help';
-import Hidden from '@material-ui/core/Hidden';
-import IconButton from '@material-ui/core/IconButton';
-import Link from '@material-ui/core/Link';
+import {
+  makeStyles,
+  AppBar,
+  Toolbar,
+  IconButton,
+  Drawer,
+  Button,
+  List,
+  Typography,
+  Divider,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  ListSubheader,
+  Box,
+  Grid,
+  Hidden,
+  Switch,
+} from '@material-ui/core';
+import { useTheme } from '@material-ui/core/styles';
 import MenuIcon from '@material-ui/icons/Menu';
-import AccountCircleIcon from '@material-ui/icons/AccountCircle';
-import BusinessIcon from '@material-ui/icons/Business';
-import Tab from '@material-ui/core/Tab';
-import Tabs from '@material-ui/core/Tabs';
-import Toolbar from '@material-ui/core/Toolbar';
-import Tooltip from '@material-ui/core/Tooltip';
-import Typography from '@material-ui/core/Typography';
-import { createStyles, Theme, withStyles, WithStyles } from '@material-ui/core/styles';
+import AccountCircle from '@material-ui/icons/AccountCircle';
 
-const lightColor = 'rgba(255, 255, 255, 0.7)';
+import Apps from '@material-ui/icons/Apps';
+import MoreVert from '@material-ui/icons/MoreVert';
+import VideoCall from '@material-ui/icons/VideoCall';
 
-/* https://material-ui.com/pt/guides/typescript/#usage-of-withstyles -- createStyles */
+import HomeIcon from '@material-ui/icons/Home';
+import Subscriptions from '@material-ui/icons/Subscriptions';
+import Whatshot from '@material-ui/icons/Whatshot';
 
-const styles = (theme: Theme) =>
-  createStyles({
-    secondaryBar: {
-      zIndex: 0,
-    },
-    menuButton: {
-      marginLeft: -theme.spacing(1),
-    },
-    iconButtonAvatar: {
-      padding: 4,
-    },
-    link: {
-      textDecoration: 'none',
-      color: lightColor,
-      '&:hover': {
-        color: theme.palette.common.white,
-      },
-    },
-    button: {
-      borderColor: lightColor,
-    },
-  });
+import VideoLibrary from '@material-ui/icons/VideoLibrary';
+import History from '@material-ui/icons/History';
 
-interface HeaderProps extends WithStyles<typeof styles> {
-  
-  usuario: string | undefined;
+import AddCircle from '@material-ui/icons/AddCircle';
 
+const useStyles = makeStyles((theme) => ({
+  root: {
+    height: '100vh',
+    backgroundColor: theme.palette.background.default,
+  },
+  appBar: {
+    boxShadow: 'none',
+    zIndex: theme.zIndex.drawer + 1,
+  },
+  logo: {
+    height: 25,
+  },
+  drawer: {
+    width: 240,
+    flexShrink: 0,
+  },
+  drawerPaper: {
+    width: 240,
+    borderRight: 'none',
+  },
+  menuIcon: {
+    paddingRight: theme.spacing(5),
+    paddingLeft: theme.spacing(6),
+  },
+  icons: {
+    paddingRight: theme.spacing(5),
+  },
+  grow: {
+    flexGrow: 1,
+  },
+  listItemText: {
+    fontSize: 14,
+  },
+  listItem: {
+    paddingTop: 4,
+    paddingBottom: 4,
+  },
+  subheader: {
+    textTransform: 'uppercase',
+  },
+}));
+
+interface HeaderProps {
+   usuario: string | undefined;
 }
 
-function Header(props: HeaderProps) {
-  const { classes,  usuario } = props;
+const Header: React.FC<HeaderProps> = (props) => {
+  const classes = useStyles();
+  const theme = useTheme();
+
+  const { usuario } = props;
 
   return (
-    <React.Fragment>
-      <AppBar color="primary" position="sticky" elevation={55}>
+    
+      <AppBar color='inherit' className={classes.appBar}>
         <Toolbar>
-          <Grid container spacing={1} alignItems="center">
-          <Grid item>
-              
-                <IconButton color="inherit">
-                  <BusinessIcon fontSize="large"/>
-                  
-                </IconButton>
-              
-            </Grid>
-            
-            <Grid item xs />  {/* Empurra o grid de baixo para o canto direito */}
-
-            <Grid item>
-              <Tooltip title="Usuário conectado">
-                <IconButton color="inherit">
-                  <AccountCircleIcon />
-                  {usuario}
-                </IconButton>
-              </Tooltip>
-            </Grid>
-          </Grid>
+          <IconButton
+            edge='start'
+            className={classes.menuIcon}
+            aria-label='menu'
+          >
+            <MenuIcon />
+          </IconButton>
+          <img
+            src={
+              theme.palette.type === 'dark'
+                ? '/images/branco.png'
+                : '/images/preto.png'
+            }
+            alt='logo'
+            className={classes.logo}
+          />
+          <div className={classes.grow} />
+          
+          <IconButton className={classes.icons}>
+            <VideoCall />
+          </IconButton>
+          <IconButton className={classes.icons}>
+            <Apps />
+          </IconButton>
+          <IconButton className={classes.icons}>
+            <MoreVert />
+          </IconButton>
+          <Button
+            startIcon={<AccountCircle />}
+            variant='outlined'
+            color='secondary'
+          >
+            {usuario}
+          </Button>
         </Toolbar>
       </AppBar>
-      <AppBar
-        component="div"
-        className={classes.secondaryBar}
-        color="primary"
-        position="static"
-        elevation={0}
-      >
-        <Toolbar>
-          <Grid container alignItems="center" spacing={1}>
-            <Grid item xs>
-              <Typography color="inherit" variant="h4" component="h1">
-                Nova empresa
-              </Typography>
-            </Grid>
-          </Grid>
-        </Toolbar>
-      </AppBar>
-      <AppBar
-        component="div"
-        className={classes.secondaryBar}
-        color="primary"
-        position="static"
-        elevation={0}
-      >
-        <Toolbar>
-          <Grid container alignItems="center" spacing={1}>
-            <Grid item xs>
-              <Typography color="inherit" variant="body2" >
-                importe arquivos xml para gerar informações da empresa e dos produtos
-              </Typography>
-            </Grid>
-          </Grid>
-        </Toolbar>
-      </AppBar>
-    </React.Fragment >
+      
+    
   );
 }
 
-export default withStyles(styles)(Header);
+export default Header;

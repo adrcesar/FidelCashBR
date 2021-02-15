@@ -13,11 +13,19 @@ import blue from '@material-ui/core/colors/blue';
 const App: React.FC = () => {
 
   const theme = createMuiTheme({
+    spacing: 4,
     palette: {
       primary: {
         main: '#f44336',
-      }
-    }
+      },
+      secondary: {
+        main: '#3EA6FF',
+      },
+      background: {
+        default: '#FFF',
+        paper:  '#FFF',
+      },
+    },
   });
 
   return (
