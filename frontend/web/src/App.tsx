@@ -22,8 +22,8 @@ const App: React.FC = () => {
         main: '#3EA6FF',
       },
       background: {
-        default: '#FFF',
-        paper:  '#FFF',
+        default: '##283593',
+        paper:  '#c62828',
       },
     },
   });
