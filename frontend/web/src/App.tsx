@@ -5,7 +5,7 @@ import { AuthProvider } from "./contexts/auth";
 import { ThemeProvider, createMuiTheme } from '@material-ui/core';
 
 import Routes from "./routes";
-import blue from '@material-ui/core/colors/blue';
+
 
 
 
@@ -14,7 +14,7 @@ const App: React.FC = () => {
 
   const theme = createMuiTheme({
     spacing: 4,
-    palette: {
+    /* palette: {
       primary: {
         main: '#f44336',
       },
@@ -22,10 +22,10 @@ const App: React.FC = () => {
         main: '#3EA6FF',
       },
       background: {
-        default: '##283593',
-        paper:  '#c62828',
+        default: 'red',
+        paper:  '#FFF',
       },
-    },
+    }, */
   });
 
   return (

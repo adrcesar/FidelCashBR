@@ -14,16 +14,16 @@ import PermMediaOutlinedIcon from '@material-ui/icons/PhotoSizeSelectActual';
 import GroupIcon from '@material-ui/icons/Group';
 import PeopleIcon from '@material-ui/icons/People';
 
-
-
 const useStyles = makeStyles((theme) => ({
   drawer: {
     width: 240,
     flexShrink: 0,
+    
   },
   drawerPaper: {
     width: 240,
     borderRight: 'none',
+    
   },
   listItemText: {
     fontSize: 14,

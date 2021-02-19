@@ -20,7 +20,7 @@ const useStyles = makeStyles((theme) => ({
   appBar: {
     boxShadow: 'none',
     zIndex: theme.zIndex.drawer + 1,
-
+    background: 'theme.palette.background.default',
   },
   logo: {
     height: 25,
