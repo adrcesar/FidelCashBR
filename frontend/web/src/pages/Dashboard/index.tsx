@@ -6,6 +6,7 @@ import Header from '../../Components/Header';
 import { useAuth } from "../../contexts/auth";
 import { Box } from '@material-ui/core';
 import SignIn from '../SignIn';
+import FormImplantacao from './formImplantacao';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -34,7 +35,7 @@ function DashBoard() {
           <h1>Logado</h1>
           <p>{user?.name}</p>
           <button title="Sign Out" onClick={handleSignOut} />
-          <SignIn />
+          <FormImplantacao />
         </Box>
       </Box>
     </div>

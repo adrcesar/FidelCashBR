@@ -42,7 +42,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 		auth.userDetailsService(autenticacaoService).passwordEncoder(new BCryptPasswordEncoder());
-		;
+		
 	}
 
 	@Override
@@ -68,6 +68,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	 //obter senha criptografada
 	 public static void main(String[] args) {
+		 System.out.println("senha");
 	 System.out.println(new BCryptPasswordEncoder().encode("FCacf4994$$"));
 	}
 }

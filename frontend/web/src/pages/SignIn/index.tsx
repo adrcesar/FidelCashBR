@@ -38,6 +38,9 @@ const useStyles = makeStyles((theme) => ({
         flexDirection: 'column',
         alignItems: 'center',
     },
+    toast: {
+        marginBottom: theme.spacing(10),
+    },
     avatar: {
         margin: theme.spacing(1),
         backgroundColor: theme.palette.primary.main,
@@ -73,7 +76,8 @@ const SignIn: React.FC = () => {
             .then(response => {
                 signIn(response.data.token, usuario, senha, response.data.perfil);
             })
-            .catch(() => {
+            .catch((error) => {
+                console.log(error.response.data);
                 setMensagem({
                     open: true,
                     texto: 'Usuário inválido',
@@ -89,25 +93,28 @@ const SignIn: React.FC = () => {
     return (
 
         <Container component="main" maxWidth="xs">
-            <CssBaseline />
-            
+            {/* <CssBaseline /> */}
+
 
 
             <div className={classes.paper}>
-            <Toast
-                open={mensagem.open}
-                handleClose={() =>
-                    setMensagem({
-                        open: false,
-                        texto: '',
-                        severity: 'sucess'
-                    })
+                <div className={classes.toast}>
+                    <Toast
+                        open={mensagem.open}
+                        handleClose={() =>
+                            setMensagem({
+                                open: false,
+                                texto: '',
+                                severity: 'sucess'
+                            })
 
-                }
-                severity={mensagem.severity}
-            >
-                {mensagem.texto}
-            </Toast>
+                        }
+                        severity={mensagem.severity}
+                    >
+                        {mensagem.texto}
+                    </Toast>
+                </div>
+
                 <Avatar className={classes.avatar}>
                     <LockOutlinedIcon />
                 </Avatar>

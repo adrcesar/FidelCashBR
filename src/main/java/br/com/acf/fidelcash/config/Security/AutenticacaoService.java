@@ -21,10 +21,11 @@ public class AutenticacaoService implements UserDetailsService{
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		Optional<Usuario> usuario = usuarioService.findByUsuario(username);
+		
 		if(usuario.isPresent()) {
 			return usuario.get();
 		}
-		throw new UsernameNotFoundException("Dados inválidos!!!");
+		throw new UsernameNotFoundException("Dados inválidos8888!!!");
 	}
 	
 }

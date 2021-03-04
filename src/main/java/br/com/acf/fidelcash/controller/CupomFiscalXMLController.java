@@ -12,11 +12,14 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.xml.sax.SAXException;
 
 import br.com.acf.fidelcash.controller.dto.ImportacaoDto;
@@ -38,13 +41,19 @@ public class CupomFiscalXMLController {
 	@Autowired
 	private CupomFiscalXMLImportacaoService cfImporta;	
 	
+	
+//	 @AuthenticationPrincipal Usuario logado,
+  //  @RequestParam MultipartFile[] xml 
+	
+	
 	@PostMapping("/implantacao")
 	public ResponseEntity<UtilDtoImplantacao> implantarFidel(
-			                                   @RequestBody @Valid ImplantacaoForm form,
-			                                   @AuthenticationPrincipal Usuario logado) { 
+			                                   @ModelAttribute ImplantacaoForm form
+			                                  ) { 
 		try {
+			
 			BigInteger cnpj = form.getCnpj();
-			UtilDtoImplantacao utilDto = cfImplementa.implantarFidelCash(cnpj, logado);
+			UtilDtoImplantacao utilDto = cfImplementa.implantarFidelCash(cnpj, /*logado,*/ form.getXml());
 			if(utilDto.isErro()) {
 				return ResponseEntity.badRequest().body(utilDto);
 			} else {

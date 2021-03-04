@@ -21,9 +21,11 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.xml.sax.SAXException;
 
 import br.com.acf.fidelcash.controller.dto.UtilDtoImplantacao;
+import br.com.acf.fidelcash.controller.service.exception.CupomFiscalXMLUploadServiceException;
 import br.com.acf.fidelcash.controller.service.exception.EmpresaServiceException;
 import br.com.acf.fidelcash.controller.service.exception.ProdutoServiceException;
 import br.com.acf.fidelcash.controller.service.exception.TipoClienteServiceException;
@@ -68,13 +70,20 @@ public class CupomFiscalXMLImplantacaoService {
 	@Autowired
 	private CupomFiscalXMLService cfXMLService;
 	
+	@Autowired
+	private CupomFisccalXMLUploadService uploadService;
+	
+	
+	
+	
+	
 	
 	
 	@Transactional(rollbackFor = { Exception.class })
-	public UtilDtoImplantacao implantarFidelCash(BigInteger cnpjEmpresa, Usuario logado)
-			throws CupomFiscalXMLException, EmpresaServiceException, UtilServiceException, UsuarioServiceException {
+	public UtilDtoImplantacao implantarFidelCash(BigInteger cnpjEmpresa, /*Usuario logado,*/ MultipartFile[] XMLs)
+			throws CupomFiscalXMLException, EmpresaServiceException, UtilServiceException, UsuarioServiceException, CupomFiscalXMLUploadServiceException {
 		try {
-			usuarioService.verificaPerfil(logado, "ADMINISTRADOR");
+			//usuarioService.verificaPerfil(logado, "ADMINISTRADOR");
 			
 			empresaService.validaEmpresaImplantada(cnpjEmpresa);
 			
@@ -84,11 +93,16 @@ public class CupomFiscalXMLImplantacaoService {
 				utilService.criarUtilidadeImplantacao("D:\\Projetos\\fidelcash\\arquivos-xml", "DIRETORIO_PADRAO", "PASTA QUE ARMAZENARÁ TODA A ESTRUTURA DE ARQUIVOS XML DAS EMPRESAS");
 				diretorioPadrao = utilService.findByEmpresaAndUtilidade(null, "DIRETORIO_PADRAO");
 			}
-			String diretorioEmpresa = diretorioPadrao.get().getPasta()+"\\"+cnpjEmpresa+"\\implantacao\\upload";
-			utilService.criarDiretorio(diretorioEmpresa);
-			utilService.criarUtilidadeImplantacao(diretorioEmpresa,
+			String diretorioEmpresaImplantacao = diretorioPadrao.get().getPasta()+"\\"+cnpjEmpresa+"\\implantacao";
+			String diretorioEmpresaImplantacaoUpload = diretorioEmpresaImplantacao+"\\upload";
+			utilService.criarDiretorio(diretorioEmpresaImplantacaoUpload);
+			utilService.criarUtilidadeImplantacao(diretorioEmpresaImplantacaoUpload,
 												  cnpjEmpresa.toString(),
 					                              "ARMAZENA OS ARQUIVOS XML QUE GERARAO A IMPLANTACAO DA EMPRESA");
+			
+			uploadService.salvarArquivos(diretorioEmpresaImplantacao, "upload", XMLs);
+			
+			
 			String pasta = utilService.getPastaXML(cnpjEmpresa.toString());
 			Map<Path, String> mapArquivos = implantarEmpresaByXml(pasta, cnpjEmpresa);
 			Optional<Empresa> empresaFind = empresaService.findByCnpj(cnpjEmpresa);
@@ -215,7 +229,7 @@ public class CupomFiscalXMLImplantacaoService {
 	private void criarDiretorio(String pastaString, Path pastaPath) throws CupomFiscalXMLException {
 		if (!Files.exists(pastaPath)) {
 			File file = new File(pastaString);
-			boolean bool = file.mkdir();
+			boolean bool = file.mkdirs();
 			if (!bool) {
 				throw new CupomFiscalXMLException(pastaString + " nao pode ser criada" , pastaString + " nao pode ser criada" );
 			} 
