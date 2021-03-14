@@ -31,8 +31,6 @@ jeito é o mais recomendável fazer e comumente utilizado pela comunidade.*/
 const AuthProvider: React.FC = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);  /*pode ser object ou nulo*/
 
-
-
     useEffect(() => {
 
         async function loadStorageData() {

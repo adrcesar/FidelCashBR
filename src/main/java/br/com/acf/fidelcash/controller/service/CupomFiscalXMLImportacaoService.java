@@ -10,22 +10,26 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.xml.sax.SAXException;
 
 import br.com.acf.fidelcash.controller.dto.ImportacaoDto;
 import br.com.acf.fidelcash.controller.service.exception.ClienteServiceException;
 import br.com.acf.fidelcash.controller.service.exception.CupomFiscalItemServiceException;
 import br.com.acf.fidelcash.controller.service.exception.CupomFiscalServiceException;
+import br.com.acf.fidelcash.controller.service.exception.CupomFiscalXMLUploadServiceException;
 import br.com.acf.fidelcash.controller.service.exception.EmpresaServiceException;
 import br.com.acf.fidelcash.controller.service.exception.TipoClienteServiceException;
 import br.com.acf.fidelcash.controller.service.exception.UtilServiceException;
@@ -66,16 +70,55 @@ public class CupomFiscalXMLImportacaoService {
 
 	@Autowired
 	private CupomFiscalXMLService cfXMLService;
+	
+	@Autowired
+	private CupomFisccalXMLUploadService uploadService;
 
 	
 
 	@Transactional(rollbackFor = { Exception.class })
-	public List<ImportacaoDto> importarXml() throws IOException, ParserConfigurationException, SAXException,
-			ParseException, CupomFiscalXMLException, UtilServiceException {
+	public List<ImportacaoDto> importarXml(MultipartFile[] XMLs) throws IOException, ParserConfigurationException, SAXException,
+			ParseException, CupomFiscalXMLException, UtilServiceException, CupomFiscalXMLUploadServiceException {
 		try {
+			
+			Optional<Util> diretorioPadrao = utilService.findByEmpresaAndUtilidade(null, "DIRETORIO_PADRAO");
+			String diretorioRaiz = diretorioPadrao.get().getPasta();    
+			String upload = "upload";
+			uploadService.salvarArquivos(diretorioRaiz, upload, XMLs);
+			
+			//
 			List<Util> pastas = utilService.getPastasImportacaoXML("upload_import_xml");
+			Path dir = Paths.get(diretorioRaiz.concat("/upload"));
+			DirectoryStream<Path> directoryUploadGeral = Files.newDirectoryStream(dir, "*.xml*");
+			
+			for (Path arquivo : directoryUploadGeral) {
+				for (int i = 0; i < pastas.size(); i++) {
+					String xml = arquivo.toString();
+					CupomFiscalXML cfXML = cfXMLService.GerarDadosByXml(xml);
+					Empresa empresaXML = cfXML.getEmpresa();
+					
+					if(empresaXML.getCnpj().compareTo(pastas.get(i).getEmpresa().getCnpj()) == 0) {
+						String stringArquivoDestino = pastas.get(i).getPasta() + arquivo.getFileName();
+						Path arquivoDestino = FileSystems.getDefault().getPath(stringArquivoDestino);
+						Files.move(arquivo, arquivoDestino, StandardCopyOption.ATOMIC_MOVE);
+						
+					}
+					
+				}
+			}
+			directoryUploadGeral.close();
+			
+			//String xml = arquivo.toString();
+			//CupomFiscalXML cfXML = cfXMLService.GerarDadosByXml(xml);
+			
+			//
+			
+			//List<Util> pastas = utilService.getPastasImportacaoXML("upload_import_xml");
+			
 			List<ImportacaoDto> importacaoDto = new ArrayList<ImportacaoDto>();
 			for (int i = 0; i < pastas.size(); i++) {
+				
+				
 				Map<Path, String> mapArquivos = importarXml(pastas.get(i).getPasta(), pastas.get(i).getEmpresa());
 				List<String> arquivos = movimentacaoDeArquivos(mapArquivos, pastas.get(i).getEmpresa());
 				Collections.sort(arquivos);

@@ -51,6 +51,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		//.antMatchers(HttpMethod.GET, "/campanhas/periodocompras/*").permitAll()
 		.antMatchers(HttpMethod.POST, "/auth").permitAll()
 		.antMatchers(HttpMethod.POST, "/cupomfiscalxml/implantacao/*").permitAll()
+		.antMatchers(HttpMethod.POST, "/cupomfiscalxml/importacao/*").permitAll()
 		.antMatchers(HttpMethod.GET, "/actuator/**").permitAll()
 		.anyRequest().authenticated()
 		//.and().formLogin();
@@ -70,5 +71,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	 public static void main(String[] args) {
 		 System.out.println("senha");
 	 System.out.println(new BCryptPasswordEncoder().encode("FCacf4994$$"));
+	 
+
+	 
 	}
 }

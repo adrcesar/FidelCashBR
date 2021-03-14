@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import br.com.acf.fidelcash.controller.service.UsuarioService;
@@ -21,11 +22,12 @@ public class AutenticacaoService implements UserDetailsService{
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		Optional<Usuario> usuario = usuarioService.findByUsuario(username);
+		System.out.println("maldita senha dos infermos " + new BCryptPasswordEncoder().encode(usuario.get().getSenha()));
 		
 		if(usuario.isPresent()) {
 			return usuario.get();
 		}
-		throw new UsernameNotFoundException("Dados inválidos8888!!!");
+		throw new UsernameNotFoundException("Dados inválidos!!!");
 	}
 	
 }

@@ -68,10 +68,7 @@ const SignIn: React.FC = () => {
         }
     );
 
-
-
-
-    async function handleSign() {
+       async function handleSign() {
         api.post("/auth", { usuario, senha })
             .then(response => {
                 signIn(response.data.token, usuario, senha, response.data.perfil);
@@ -80,7 +77,7 @@ const SignIn: React.FC = () => {
                 console.log(error.response.data);
                 setMensagem({
                     open: true,
-                    texto: 'Usuário inválido',
+                    texto: error.response.data.erro,
                     severity: 'error'
                 })
             })
@@ -93,10 +90,7 @@ const SignIn: React.FC = () => {
     return (
 
         <Container component="main" maxWidth="xs">
-            {/* <CssBaseline /> */}
-
-
-
+            
             <div className={classes.paper}>
                 <div className={classes.toast}>
                     <Toast

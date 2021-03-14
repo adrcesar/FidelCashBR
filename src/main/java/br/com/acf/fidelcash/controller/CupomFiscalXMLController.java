@@ -27,6 +27,7 @@ import br.com.acf.fidelcash.controller.dto.UtilDtoImplantacao;
 import br.com.acf.fidelcash.controller.form.ImplantacaoForm;
 import br.com.acf.fidelcash.controller.service.CupomFiscalXMLImplantacaoService;
 import br.com.acf.fidelcash.controller.service.CupomFiscalXMLImportacaoService;
+import br.com.acf.fidelcash.controller.service.exception.CupomFiscalXMLUploadServiceException;
 import br.com.acf.fidelcash.controller.service.exception.UtilServiceException;
 import br.com.acf.fidelcash.modelo.Usuario;
 import br.com.acf.fidelcash.modelo.exception.CupomFiscalXMLException;
@@ -48,12 +49,13 @@ public class CupomFiscalXMLController {
 	
 	@PostMapping("/implantacao")
 	public ResponseEntity<UtilDtoImplantacao> implantarFidel(
-			                                   @ModelAttribute ImplantacaoForm form
+			                                   @ModelAttribute ImplantacaoForm form,
+			                                   @AuthenticationPrincipal Usuario logado
 			                                  ) { 
 		try {
 			
 			BigInteger cnpj = form.getCnpj();
-			UtilDtoImplantacao utilDto = cfImplementa.implantarFidelCash(cnpj, /*logado,*/ form.getXml());
+			UtilDtoImplantacao utilDto = cfImplementa.implantarFidelCash(cnpj, logado, form.getXml());
 			if(utilDto.isErro()) {
 				return ResponseEntity.badRequest().body(utilDto);
 			} else {
@@ -69,12 +71,12 @@ public class CupomFiscalXMLController {
     }
 	
 	@PostMapping("/importacao")
-	public ResponseEntity<List<ImportacaoDto>> importarXml() {
+	public ResponseEntity<List<ImportacaoDto>> importarXml(@ModelAttribute ImplantacaoForm form) {
 		try {
-			List<ImportacaoDto> importacao =  cfImporta.importarXml();
+			List<ImportacaoDto> importacao =  cfImporta.importarXml(form.getXml());
 			return ResponseEntity.ok(importacao);
 		} catch (IOException | ParserConfigurationException | SAXException | ParseException
-				| CupomFiscalXMLException | UtilServiceException e) {
+				| CupomFiscalXMLException | UtilServiceException | CupomFiscalXMLUploadServiceException  e) {
 			List<ImportacaoDto >importacaoErro = new ArrayList<ImportacaoDto>();
 			importacaoErro.get(0).setErro("Erro ao importar arquivos XML.");
 			return ResponseEntity.badRequest().body(importacaoErro);

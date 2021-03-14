@@ -35,8 +35,17 @@ public class CupomFisccalXMLUploadService {
 	private void salvar(String raiz, String diretorio, MultipartFile arquivo)
 			throws CupomFiscalXMLUploadServiceException {
 		Path diretorioPath = Paths.get(raiz, diretorio);
-		System.out.println(diretorioPath.toString());
-		Path arquivoPath = diretorioPath.resolve(arquivo.getOriginalFilename());
+		
+		int posicaoUltimaBarra = arquivo.getOriginalFilename().lastIndexOf("/");
+		String nomeArquivo = "";
+		if(posicaoUltimaBarra != -1) {
+			nomeArquivo = arquivo.getOriginalFilename().substring(posicaoUltimaBarra + 1 );
+		} else {
+			nomeArquivo = arquivo.getOriginalFilename();
+		}
+		 
+		
+		Path arquivoPath = diretorioPath.resolve(nomeArquivo);
 		System.out.println(arquivoPath.toString());
 
 		try {

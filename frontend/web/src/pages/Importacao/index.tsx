@@ -5,7 +5,8 @@ import Header from '../../Components/Header';
 
 import { useAuth } from "../../contexts/auth";
 import { Box } from '@material-ui/core';
-import FormImplantacao from './formImplantacao';
+
+import Importacao from './importacao';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -34,7 +35,7 @@ function DashBoard() {
       <Box display='flex'>
         <Navigator perfil={user?.perfil} />
         <Box bgcolor='#eeeeee' className={classes.content} >
-          <FormImplantacao />
+          <Importacao />
         </Box>
       </Box>
     </Box> 

@@ -8,22 +8,24 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  Hidden,
 } from '@material-ui/core';
 import { useTheme } from '@material-ui/core/styles';
 import PermMediaOutlinedIcon from '@material-ui/icons/PhotoSizeSelectActual';
 import GroupIcon from '@material-ui/icons/Group';
 import PeopleIcon from '@material-ui/icons/People';
+import { Link } from 'react-router-dom';
 
 const useStyles = makeStyles((theme) => ({
   drawer: {
     width: 240,
     flexShrink: 0,
-    
+
   },
   drawerPaper: {
     width: 240,
     borderRight: 'none',
-    
+
   },
   listItemText: {
     fontSize: 14,
@@ -86,44 +88,54 @@ const Navigator: React.FC<NavigatorProps> = (props) => {
   createMenuByPerfil(perfil);
 
   return (
-    <Drawer
-      className={classes.drawer}
-      variant='permanent'
-      classes={{
-        paper: classes.drawerPaper,
-      }}
-    >
-      <Toolbar />
-      <div >
-        <List>
-          {categories.map(({ id, children }) => (
-            <React.Fragment key={id}>
-              <ListItem button classes={{ root: classes.listItem }}>
-                <ListItemText
-                  classes={{
-                    primary: classes.listItemText,
-                  }}
-                  primary={id}
-                />
-              </ListItem>
-              {children.map(({ id: childId, icon, active }) =>
+    <Hidden mdDown>
+      <Drawer
+        className={classes.drawer}
+        variant='permanent'
+        classes={{
+          paper: classes.drawerPaper,
+        }}
+      >
+        <Toolbar />
+        <div >
+          <List>
+            {categories.map(({ id, children }) => (
+              <React.Fragment key={id}>
                 <ListItem button classes={{ root: classes.listItem }}>
-                  <ListItemIcon>{icon}</ListItemIcon>
                   <ListItemText
                     classes={{
                       primary: classes.listItemText,
                     }}
-                    primary={childId}
-                  >
-                  </ListItemText>
+                    primary={id}
+                  />
                 </ListItem>
-              )}
-              <Divider />
-            </React.Fragment>
-          ))}
-        </List>
-      </div>
-    </Drawer>
+                {children.map(({ id: childId, icon, active }) =>
+                  <ListItem button classes={{ root: classes.listItem }}>
+                    <ListItemIcon>{icon}</ListItemIcon>
+                    <ListItemText
+                      classes={{
+                        primary: classes.listItemText,
+                      }}
+                      primary={childId}
+                    >
+                    </ListItemText>
+                  </ListItem>
+                )}
+                <Divider />
+              </React.Fragment>
+            ))}
+            <ListItem>
+              <Link to="/importacao">
+                <ListItemText primary="teste" />
+              </Link>
+              
+              
+            </ListItem>
+          </List>
+        </div>
+      </Drawer>
+    </Hidden>
+
   );
 }
 

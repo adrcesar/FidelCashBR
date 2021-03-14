@@ -40,12 +40,18 @@ public class AutenticacaoController {
 			Authentication authentication = authManager.authenticate(dadosLogin);
 			String token = tokenService.gerarToken(authentication);
 			String perfil = usuarioService.findPerfilByUsuario(form.getUsuario());
-			System.out.println(token);
+			
 			
 			
 			return ResponseEntity.ok(new TokenDto(token, "Bearer", perfil));
 		} catch (Exception e) {
-			return ResponseEntity.badRequest().build();
+			String erro = null;
+			if (e.getMessage().equals("Bad credentials")) {
+				erro = "Usuário inválido";
+			} else {
+				erro = e.getMessage();
+			}
+			return ResponseEntity.badRequest().body(new TokenDto(erro));
 		}
 	}
 

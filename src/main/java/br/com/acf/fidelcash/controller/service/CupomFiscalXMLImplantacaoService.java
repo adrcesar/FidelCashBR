@@ -80,10 +80,10 @@ public class CupomFiscalXMLImplantacaoService {
 	
 	
 	@Transactional(rollbackFor = { Exception.class })
-	public UtilDtoImplantacao implantarFidelCash(BigInteger cnpjEmpresa, /*Usuario logado,*/ MultipartFile[] XMLs)
+	public UtilDtoImplantacao implantarFidelCash(BigInteger cnpjEmpresa, Usuario logado, MultipartFile[] XMLs)
 			throws CupomFiscalXMLException, EmpresaServiceException, UtilServiceException, UsuarioServiceException, CupomFiscalXMLUploadServiceException {
 		try {
-			//usuarioService.verificaPerfil(logado, "ADMINISTRADOR");
+			usuarioService.verificaPerfil(logado, "ADMINISTRADOR");
 			
 			empresaService.validaEmpresaImplantada(cnpjEmpresa);
 			

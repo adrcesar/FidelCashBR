@@ -1,18 +1,24 @@
-import React, { FormEvent, useContext, useState } from "react";
-import Avatar from '@material-ui/core/Avatar';
-import Button from '@material-ui/core/Button';
+import React, { FormEvent, InputHTMLAttributes, useState } from "react";
 
-import TextField from '@material-ui/core/TextField';
-
-import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
-import Typography from '@material-ui/core/Typography';
-import { makeStyles } from '@material-ui/core/styles';
-import Container from '@material-ui/core/Container';
-
-
-import api from "../../services/api";
+import { Container } from "@material-ui/core";
 import Toast from "../../Components/Toast";
 
+import CloudUploadIcon from '@material-ui/icons/CloudUpload';
+import Avatar from "@material-ui/core/Avatar";
+import Typography from "@material-ui/core/Typography";
+import makeStyles from "@material-ui/core/styles/makeStyles";
+import Button from "@material-ui/core/Button";
+
+import api from "../../services/api";
+
+//GAMBIARRA ACHADA NA INTERNET DEPOIS DE MUITO CUSTO
+declare module 'react' {
+    interface HTMLAttributes<T> extends AriaAttributes, DOMAttributes<T> {
+      // extends React's HTMLAttributes
+      directory?: string;
+      webkitdirectory?:string;
+    }
+  }
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -35,9 +41,10 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
+//PEGO TODAS AS PROPRIEDADES DO ELEMENTO INPUT DO HTML
 
-const FormImplantacao: React.FC = () => {
 
+const Importacao: React.FC = () => {
     const [mensagem, setMensagem] = useState(
         {
             open: false,
@@ -46,63 +53,57 @@ const FormImplantacao: React.FC = () => {
         }
     );
 
-    const [cnpj, setCnpj] = useState("");
     const [files, setFiles] = useState<any>([]);
 
     function handleChange(event: any) {
         setFiles(event.target.files);
     };
 
-
-
     const handleImplantarEmpresa = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         const formData = new FormData();
-        formData.set('cnpj', cnpj)
+        
         for (var x = 0; x < files.length; x++) {
             formData.append('xml', files[x]);
+            console.log(formData.get('xml'));
         }
 
-        console.log(formData.get('cnpj'));
+        
         var token = localStorage.getItem('@FIDELCASH/TOKEN');
-        console.log('token: ' + token);
         var tamanhoToken = token?.length;
         token = 'Bearer ' + token!.substring(1, (tamanhoToken! - 1)) //'tamanhoToken'; // náo quero o primeiro nem o último caracter
-        console.log('token: ' + token);
-        api.post("/cupomfiscalxml/implantacao", formData, {
+
+        api.post("/cupomfiscalxml/importacao", formData, {
             headers: {
                 'Authorization': token,
                 'Content-Type': 'application/json',
             },
         })
-            .then(response => {
-                setMensagem({
-                    open: true,
-                    texto: 'Empresa implantada',
-                    severity: 'success'
-                })
-                setCnpj('');
-                setFiles(['']);
+        .then(response => {
+            setMensagem({
+                open: true,
+                texto: 'Cupons importados com sucesso.',
+                severity: 'success'
             })
-            .catch((error) => {
+            
+        })
+        .catch((error) => {
 
-                setMensagem({
-                    open: true,
-                    texto: error.response.data.erroMensagem,
-                    severity: 'error'
-                })
+            setMensagem({
+                open: true,
+                texto: error.response.data.erroMensagem,
+                severity: 'error'
             })
-
-
+        })
+        
+        
     }
 
     const classes = useStyles();
 
     return (
-
         <Container component="main" maxWidth="xs">
-
             <Toast
                 open={mensagem.open}
                 handleClose={() =>
@@ -119,30 +120,17 @@ const FormImplantacao: React.FC = () => {
             </Toast>
 
             <div className={classes.paper}>
-
                 <Avatar className={classes.avatar}>
-                    <LockOutlinedIcon />
+                    <CloudUploadIcon />
                 </Avatar>
-                <Typography component="h1" variant="h5">
-                    Implantação de uma nova empresa
-                </Typography>
-                <form className={classes.form}
-                    onSubmit={handleImplantarEmpresa}
-                >
-                    <TextField
-                        variant="outlined"
-                        margin="normal"
-                        required
-                        fullWidth
-                        id="cnpj"
-                        label="CNPJ"
-                        name="cnpj"
-                        placeholder="CNPJ"
-                        value={cnpj}
-                        onChange={(e) => { setCnpj(e.target.value) }}
-                        autoFocus
-                    />
 
+                <Typography component="h1" variant="h5">
+                    Upload de arquivos
+                </Typography>
+
+                <form className={classes.form}
+                      onSubmit={handleImplantarEmpresa}
+                >
                     <Button
                         variant="contained"
                         component="label"
@@ -156,11 +144,14 @@ const FormImplantacao: React.FC = () => {
                         }
                         <input
                             type="file"
+                            /* directory="" */
+                            webkitdirectory=""
                             hidden
                             multiple
                             onChange={handleChange}
                         />
                     </Button>
+
                     <Button
                         fullWidth
                         type="submit"
@@ -169,17 +160,17 @@ const FormImplantacao: React.FC = () => {
                         className={classes.submit}
                         title="Cadastrar"
                     >
-                        Implantar Empresa
+                        Upload de arquivos
                     </Button>
-
-
-
                 </form>
-            </div>
 
+            </div>
         </Container>
-        // fim
-    )
+    );
+
+    
 }
 
-export default FormImplantacao;
+
+
+export default Importacao;
