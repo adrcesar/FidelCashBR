@@ -52,6 +52,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		.antMatchers(HttpMethod.POST, "/auth").permitAll()
 		.antMatchers(HttpMethod.POST, "/cupomfiscalxml/implantacao/*").permitAll()
 		.antMatchers(HttpMethod.POST, "/cupomfiscalxml/importacao/*").permitAll()
+		.antMatchers(HttpMethod.POST, "/cupomfiscalxml/importacao2/*").permitAll()
 		.antMatchers(HttpMethod.GET, "/actuator/**").permitAll()
 		.anyRequest().authenticated()
 		//.and().formLogin();

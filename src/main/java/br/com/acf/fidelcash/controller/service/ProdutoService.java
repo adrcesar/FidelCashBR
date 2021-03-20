@@ -6,7 +6,6 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import br.com.acf.fidelcash.controller.service.exception.ProdutoServiceException;
 import br.com.acf.fidelcash.modelo.Empresa;
 import br.com.acf.fidelcash.modelo.Produto;
 import br.com.acf.fidelcash.repository.ProdutoRepository;

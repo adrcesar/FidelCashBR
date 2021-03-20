@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.com.acf.fidelcash.modelo.Perfil;
-import br.com.acf.fidelcash.modelo.Usuario;
 import br.com.acf.fidelcash.repository.PerfilRepository;
 
 @Service

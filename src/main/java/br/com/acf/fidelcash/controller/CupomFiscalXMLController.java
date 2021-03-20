@@ -55,7 +55,7 @@ public class CupomFiscalXMLController {
 		try {
 			
 			BigInteger cnpj = form.getCnpj();
-			UtilDtoImplantacao utilDto = cfImplementa.implantarFidelCash(cnpj, logado, form.getXml());
+			UtilDtoImplantacao utilDto = cfImplementa.implantarFidelCash(cnpj, logado, form);
 			if(utilDto.isErro()) {
 				return ResponseEntity.badRequest().body(utilDto);
 			} else {
@@ -79,6 +79,18 @@ public class CupomFiscalXMLController {
 				| CupomFiscalXMLException | UtilServiceException | CupomFiscalXMLUploadServiceException  e) {
 			List<ImportacaoDto >importacaoErro = new ArrayList<ImportacaoDto>();
 			importacaoErro.get(0).setErro("Erro ao importar arquivos XML.");
+			return ResponseEntity.badRequest().body(importacaoErro);
+		} 
+	}
+	
+	@PostMapping("/importacao2")
+	public ResponseEntity<ImportacaoDto> importarXml2(@ModelAttribute ImplantacaoForm form) {
+		try {
+			ImportacaoDto importacao =  cfImporta.importarXml2(form.getXml());
+			return ResponseEntity.ok(importacao);
+		} catch (CupomFiscalXMLUploadServiceException  e) {
+			ImportacaoDto importacaoErro = new ImportacaoDto();
+			importacaoErro.setErro("Erro ao importar arquivos XML.");
 			return ResponseEntity.badRequest().body(importacaoErro);
 		} 
 	}

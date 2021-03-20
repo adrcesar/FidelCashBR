@@ -7,8 +7,11 @@ import java.util.List;
 
 public class CampanhaPeriodoDeCompra {
 	private Campanha campanhaPai;
+	
 	private LocalDateTime dataFimPeriodo;
+	
 	private List<Integer> diasDosPeriodos;
+	
 	private List<Float> bonusDoPeriodo;
 	
 	public CampanhaPeriodoDeCompra() {

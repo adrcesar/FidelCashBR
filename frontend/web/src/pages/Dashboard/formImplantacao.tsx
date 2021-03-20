@@ -1,4 +1,4 @@
-import React, { FormEvent, useContext, useState } from "react";
+import React, { FormEvent, useState } from "react";
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 
@@ -47,6 +47,7 @@ const FormImplantacao: React.FC = () => {
     );
 
     const [cnpj, setCnpj] = useState("");
+    const [email, setEmail] = useState("");
     const [files, setFiles] = useState<any>([]);
 
     function handleChange(event: any) {
@@ -60,16 +61,15 @@ const FormImplantacao: React.FC = () => {
 
         const formData = new FormData();
         formData.set('cnpj', cnpj)
+        formData.set('email', email)
         for (var x = 0; x < files.length; x++) {
             formData.append('xml', files[x]);
         }
 
         console.log(formData.get('cnpj'));
         var token = localStorage.getItem('@FIDELCASH/TOKEN');
-        console.log('token: ' + token);
         var tamanhoToken = token?.length;
         token = 'Bearer ' + token!.substring(1, (tamanhoToken! - 1)) //'tamanhoToken'; // náo quero o primeiro nem o último caracter
-        console.log('token: ' + token);
         api.post("/cupomfiscalxml/implantacao", formData, {
             headers: {
                 'Authorization': token,
@@ -83,6 +83,7 @@ const FormImplantacao: React.FC = () => {
                     severity: 'success'
                 })
                 setCnpj('');
+                setEmail('');
                 setFiles(['']);
             })
             .catch((error) => {
@@ -93,8 +94,6 @@ const FormImplantacao: React.FC = () => {
                     severity: 'error'
                 })
             })
-
-
     }
 
     const classes = useStyles();
@@ -141,6 +140,20 @@ const FormImplantacao: React.FC = () => {
                         value={cnpj}
                         onChange={(e) => { setCnpj(e.target.value) }}
                         autoFocus
+                    />
+
+                    <TextField
+                        variant="outlined"
+                        margin="normal"
+                        required
+                        fullWidth
+                        type="email"
+                        id="email"
+                        label="e-mail do responsável da empresa"
+                        name="email"
+                        placeholder="e-mail"
+                        value={email}
+                        onChange={(e) => { setEmail(e.target.value) }}
                     />
 
                     <Button

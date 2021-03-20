@@ -75,6 +75,23 @@ public class CupomFiscalXMLImportacaoService {
 	private CupomFisccalXMLUploadService uploadService;
 
 	
+	
+	
+	
+	
+	public ImportacaoDto importarXml2(MultipartFile[] xml) throws CupomFiscalXMLUploadServiceException {
+		Optional<Util> diretorioPadrao = utilService.findByEmpresaAndUtilidade(null, "DIRETORIO_PADRAO");
+		String diretorioRaiz = diretorioPadrao.get().getPasta();    
+		String upload = "upload";
+		uploadService.salvarArquivos(diretorioRaiz, upload, xml);
+		
+		List<String> arquivos = new ArrayList<String>();
+		arquivos.add("teste de arquivo");
+		ImportacaoDto importacaoDto = new ImportacaoDto(diretorioRaiz, arquivos);
+		
+		
+		return importacaoDto;
+	}
 
 	@Transactional(rollbackFor = { Exception.class })
 	public List<ImportacaoDto> importarXml(MultipartFile[] XMLs) throws IOException, ParserConfigurationException, SAXException,
@@ -274,4 +291,6 @@ public class CupomFiscalXMLImportacaoService {
 			//throw new CupomFiscalXMLException(e.getMensagem(), e.getMensagem());
 		//}
 	}
+
+	
 }

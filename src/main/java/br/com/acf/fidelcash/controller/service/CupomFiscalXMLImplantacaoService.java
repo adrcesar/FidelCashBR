@@ -25,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.xml.sax.SAXException;
 
 import br.com.acf.fidelcash.controller.dto.UtilDtoImplantacao;
+import br.com.acf.fidelcash.controller.form.ImplantacaoForm;
 import br.com.acf.fidelcash.controller.service.exception.CupomFiscalXMLUploadServiceException;
 import br.com.acf.fidelcash.controller.service.exception.EmpresaServiceException;
 import br.com.acf.fidelcash.controller.service.exception.ProdutoServiceException;
@@ -80,7 +81,7 @@ public class CupomFiscalXMLImplantacaoService {
 	
 	
 	@Transactional(rollbackFor = { Exception.class })
-	public UtilDtoImplantacao implantarFidelCash(BigInteger cnpjEmpresa, Usuario logado, MultipartFile[] XMLs)
+	public UtilDtoImplantacao implantarFidelCash(BigInteger cnpjEmpresa, Usuario logado, ImplantacaoForm form)
 			throws CupomFiscalXMLException, EmpresaServiceException, UtilServiceException, UsuarioServiceException, CupomFiscalXMLUploadServiceException {
 		try {
 			usuarioService.verificaPerfil(logado, "ADMINISTRADOR");
@@ -100,7 +101,7 @@ public class CupomFiscalXMLImplantacaoService {
 												  cnpjEmpresa.toString(),
 					                              "ARMAZENA OS ARQUIVOS XML QUE GERARAO A IMPLANTACAO DA EMPRESA");
 			
-			uploadService.salvarArquivos(diretorioEmpresaImplantacao, "upload", XMLs);
+			uploadService.salvarArquivos(diretorioEmpresaImplantacao, "upload", form.getXml());
 			
 			
 			String pasta = utilService.getPastaXML(cnpjEmpresa.toString());
@@ -113,7 +114,8 @@ public class CupomFiscalXMLImplantacaoService {
 			Optional<TipoCliente> tipoCliente = tipoClienteService.findByEmpresaAndDescricao(empresaFind.get(), "PADRAO");
 			List<Produto> produtos = produtoService.findByEmpresa(empresaFind.get());
 			//
-			setUsuarioGerenteDeLoja(empresaFind.get());
+			setUsuarioGerenteDeLojaEOperador(empresaFind.get(), "GERENTE", form.getEmail());
+			setUsuarioGerenteDeLojaEOperador(empresaFind.get(), "OPERADOR", form.getEmail());
 			//
 			return utilService.dadosDaImplantacao(util, tipoCliente, produtos );
 		} catch (IOException | ParseException | ParserConfigurationException | SAXException ex) {
@@ -121,22 +123,22 @@ public class CupomFiscalXMLImplantacaoService {
 		}
 	}
 	
-	private void setUsuarioGerenteDeLoja(Empresa empresa) {
+	private void setUsuarioGerenteDeLojaEOperador(Empresa empresa, String perfilParametro, String email) {
 		Usuario usuario = new Usuario();
-		usuario.setEmail("adrcesar@gmail.com");
-		usuario.setNome("GERENTE DA LOJA "+ empresa.getId());
+		usuario.setEmail(email);
+		usuario.setNome(perfilParametro + " DA EMPRESA "+ empresa.getId());
 		
-		usuario.setSenha("$2a$10$zLiEBFy0Qm2EkCm/h5neAuk8ha2QkzBkM96Nglyb1i2U0PtaaeyiK");
+		usuario.setSenha("$2a$10$FDQz.hJXoGMTepxmID1zDeE5vezmqccQZAzdQkNiss77c/lDQsg4S");
 		usuario.setSituacao(SituacaoUsuario.ATIVO);
-		usuario.setUsuario("lj_" + empresa.getId());
+		usuario.setUsuario(perfilParametro.toLowerCase() + "_" + empresa.getId());
 		usuarioService.save(usuario);
 		
-		Optional<Perfil> perfilFind = perfilService.findByNome("GERENTE DE LOJA");
+		Optional<Perfil> perfilFind = perfilService.findByNome(perfilParametro);
 		if(perfilFind.isEmpty()) {
 			Perfil perfil = new Perfil();
-			perfil.setNome("GERENTE DE LOJA");
+			perfil.setNome(perfilParametro);
 			perfilService.save(perfil);
-			perfilFind = perfilService.findByNome("GERENTE DE LOJA");
+			perfilFind = perfilService.findByNome(perfilParametro);
 		}
 		
 		

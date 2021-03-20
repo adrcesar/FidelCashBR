@@ -2,6 +2,7 @@ package br.com.acf.fidelcash.controller.form;
 
 import java.math.BigInteger;
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
@@ -21,6 +22,9 @@ public class ImplantacaoForm {
 	@NotNull @NotEmpty //@CNPJ
 	private BigInteger cnpj;
 	
+	@NotNull @NotEmpty @Email(message = "Email inválido")
+	private String email;
+	
 	private MultipartFile[] xml;
 
 	public BigInteger getCnpj() {
@@ -29,6 +33,14 @@ public class ImplantacaoForm {
 
 	public void setCnpj(BigInteger cnpj) {
 		this.cnpj = cnpj;
+	}
+	
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 	public MultipartFile[] getXml() {

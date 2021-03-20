@@ -39,13 +39,13 @@ public class EmpresaService {
 				enderecoService.save(endereco);
 				endereco = enderecoService.findByMaxId();
 				empresaXml.setEndereco(endereco);
-				empresaXml.setSituacao(SituacaoEmpresa.INATIVA);
+				empresaXml.setSituacao(SituacaoEmpresa.ATIVA);
 				empresaRepository.save(empresaXml);
 				empresaFind = empresaRepository.findByCnpj(empresaXml.getCnpj());
 			}
 			return empresaFind.get();
 		} catch (Exception e) {
-			throw new EmpresaServiceException("Empresa invalida", "Empresa invalida");
+			throw new EmpresaServiceException("Empresa inválida", "Empresa inválida");
 		}
 	}
 
