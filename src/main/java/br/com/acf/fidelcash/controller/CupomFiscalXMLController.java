@@ -22,9 +22,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.xml.sax.SAXException;
 
+import br.com.acf.fidelcash.controller.dto.EmpresaDto;
 import br.com.acf.fidelcash.controller.dto.ImportacaoDto;
 import br.com.acf.fidelcash.controller.dto.UtilDtoImplantacao;
 import br.com.acf.fidelcash.controller.form.ImplantacaoForm;
+import br.com.acf.fidelcash.controller.form.ImportacaoForm;
 import br.com.acf.fidelcash.controller.service.CupomFiscalXMLImplantacaoService;
 import br.com.acf.fidelcash.controller.service.CupomFiscalXMLImportacaoService;
 import br.com.acf.fidelcash.controller.service.exception.CupomFiscalXMLUploadServiceException;
@@ -48,32 +50,26 @@ public class CupomFiscalXMLController {
 	
 	
 	@PostMapping("/implantacao")
-	public ResponseEntity<UtilDtoImplantacao> implantarFidel(
+	public ResponseEntity<EmpresaDto> implantarFidel(     
 			                                   @ModelAttribute ImplantacaoForm form,
 			                                   @AuthenticationPrincipal Usuario logado
-			                                  ) { 
+			                                  )  { 
 		try {
 			
 			BigInteger cnpj = form.getCnpj();
-			UtilDtoImplantacao utilDto = cfImplementa.implantarFidelCash(cnpj, logado, form);
-			if(utilDto.isErro()) {
-				return ResponseEntity.badRequest().body(utilDto);
-			} else {
-				return ResponseEntity.ok(utilDto);
-			}
+			EmpresaDto empresaDto = cfImplementa.implantarFidelCash(cnpj, logado, form);
+			return ResponseEntity.ok(empresaDto);
 		} catch (Exception e) {
-			UtilDtoImplantacao utilDtoErro = new UtilDtoImplantacao();
-			utilDtoErro.setErro(true);
-			utilDtoErro.setErroMensagem(e.getMessage());
-			return ResponseEntity.badRequest().body(utilDtoErro);
+			EmpresaDto empresaDtoErro = new EmpresaDto(e.getMessage());
+			return ResponseEntity.badRequest().body(empresaDtoErro);
 		
 		}
     }
 	
 	@PostMapping("/importacao")
-	public ResponseEntity<List<ImportacaoDto>> importarXml(@ModelAttribute ImplantacaoForm form) {
+	public ResponseEntity<List<ImportacaoDto>> importarXml(@ModelAttribute ImportacaoForm form) {
 		try {
-			List<ImportacaoDto> importacao =  cfImporta.importarXml(form.getXml());
+			List<ImportacaoDto> importacao =  cfImporta.importarXml(form);
 			return ResponseEntity.ok(importacao);
 		} catch (IOException | ParserConfigurationException | SAXException | ParseException
 				| CupomFiscalXMLException | UtilServiceException | CupomFiscalXMLUploadServiceException  e) {

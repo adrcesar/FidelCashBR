@@ -74,7 +74,6 @@ const SignIn: React.FC = () => {
                 signIn(response.data.token, usuario, senha, response.data.perfil);
             })
             .catch((error) => {
-                console.log(error.response.data);
                 setMensagem({
                     open: true,
                     texto: error.response.data.erro,

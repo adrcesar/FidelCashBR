@@ -17,17 +17,26 @@ public class Pdv {
 	
 	private String macAddress;
 	
+	private String pastaDeUpload;
+	
 	@JoinColumn(name = "id_empresa", referencedColumnName = "id")
     @ManyToOne
     private Empresa empresa;
 	
 	@Enumerated(EnumType.STRING)
 	private SituacaoPdv situacao;
+	
+	
+    //construtor vazio obrigatorio devido ao JPA
+	public Pdv() {
+		
+	}
 
-	public Pdv(String macAdress, Empresa empresa, SituacaoPdv situacaoPdv) {
+	public Pdv(String macAdress, Empresa empresa, SituacaoPdv situacaoPdv, String pastaDeUpload) {
 		this.macAddress = macAdress;
 		this.empresa = empresa;
 		this.situacao = situacaoPdv;
+		this.pastaDeUpload = pastaDeUpload;
 	}
 
 	public Integer getId() {
@@ -60,6 +69,14 @@ public class Pdv {
 
 	public void setSituacao(SituacaoPdv situacao) {
 		this.situacao = situacao;
+	}
+	
+	public String getPastaDeUpload() {
+		return pastaDeUpload;
+	}
+
+	public void setPastaDeUpload(String pastaDeUpload) {
+		this.pastaDeUpload = pastaDeUpload;
 	}
 
 	@Override

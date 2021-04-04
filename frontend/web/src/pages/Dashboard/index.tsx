@@ -23,10 +23,6 @@ function DashBoard() {
   const classes = useStyles();
   const { user, signOut } = useAuth();
 
-  function handleSignOut() {
-    signOut();
-  }
-
   return (
 
     <Box className={classes.root} p={8}>

@@ -13,6 +13,7 @@ public class EmpresaDto {
 	private String nomeRazao;
 	private String nomeFantasia;
 	private SituacaoEmpresa situacaoEmpresa;
+	private String mensagemErro;
 	
 	public EmpresaDto(Empresa empresa) {
 		this.id = empresa.getId();
@@ -20,6 +21,10 @@ public class EmpresaDto {
 		this.nomeRazao = empresa.getNomeRazao();
 		this.nomeFantasia = empresa.getNomeFantasia();
 		this.situacaoEmpresa = empresa.getSituacao();
+	}
+	
+	public EmpresaDto(String erro) {
+		this.mensagemErro = erro;
 	}
 	
 	
@@ -42,6 +47,10 @@ public class EmpresaDto {
 
 	public SituacaoEmpresa getSituacaoEmpresa() {
 		return situacaoEmpresa;
+	}
+	
+	public String getMensagemErro() {
+		return mensagemErro;
 	}
 
 

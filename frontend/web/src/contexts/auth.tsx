@@ -42,13 +42,11 @@ const AuthProvider: React.FC = ({ children }) => {
             const storagedUser = localStorage.getItem('@FIDELCASH/USER');
             const storagedToken = localStorage.getItem('@FIDELCASH/TOKEN');
             
-            console.log("auth " + storagedToken);
+           
             if (storagedUser && storagedToken) {
                 setUser(JSON.parse(storagedUser));
                 api.defaults.headers.Authorization = `Baerer ${storagedToken}`;
-            } else {
-                console.log('muitos loops meu deus');
-            }
+            } 
 
         }
 

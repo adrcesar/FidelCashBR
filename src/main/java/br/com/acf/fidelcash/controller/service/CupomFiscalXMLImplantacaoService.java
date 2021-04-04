@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.xml.sax.SAXException;
 
+import br.com.acf.fidelcash.controller.dto.EmpresaDto;
 import br.com.acf.fidelcash.controller.dto.UtilDtoImplantacao;
 import br.com.acf.fidelcash.controller.form.ImplantacaoForm;
 import br.com.acf.fidelcash.controller.service.exception.CupomFiscalXMLUploadServiceException;
@@ -81,7 +82,7 @@ public class CupomFiscalXMLImplantacaoService {
 	
 	
 	@Transactional(rollbackFor = { Exception.class })
-	public UtilDtoImplantacao implantarFidelCash(BigInteger cnpjEmpresa, Usuario logado, ImplantacaoForm form)
+	public EmpresaDto implantarFidelCash(BigInteger cnpjEmpresa, Usuario logado, ImplantacaoForm form)
 			throws CupomFiscalXMLException, EmpresaServiceException, UtilServiceException, UsuarioServiceException, CupomFiscalXMLUploadServiceException {
 		try {
 			usuarioService.verificaPerfil(logado, "ADMINISTRADOR");
@@ -91,13 +92,16 @@ public class CupomFiscalXMLImplantacaoService {
 			Optional<Util> diretorioPadrao = utilService.findByEmpresaAndUtilidade(null, "DIRETORIO_PADRAO");
 			if(diretorioPadrao.isEmpty()) {
 				utilService.criarDiretorio("D:\\Projetos\\fidelcash\\arquivos-xml");
-				utilService.criarUtilidadeImplantacao("D:\\Projetos\\fidelcash\\arquivos-xml", "DIRETORIO_PADRAO", "PASTA QUE ARMAZENARÁ TODA A ESTRUTURA DE ARQUIVOS XML DAS EMPRESAS");
+				utilService.criarUtilidadeSemEmpresa("D:\\Projetos\\fidelcash\\arquivos-xml", "DIRETORIO_PADRAO", "PASTA QUE ARMAZENARÁ TODA A ESTRUTURA DE ARQUIVOS XML DAS EMPRESAS");
 				diretorioPadrao = utilService.findByEmpresaAndUtilidade(null, "DIRETORIO_PADRAO");
+				
+				utilService.criarDiretorio("D:\\Projetos\\fidelcash\\pdv");
+				utilService.criarUtilidadeSemEmpresa("D:\\Projetos\\fidelcash\\pdv", "pdv", "PASTA QUE ARMAZENARÁ ARQUIVOS DE CONFIGURAÇÃO PARA UPLOAD DE ARQUIVOS A PARTIR DO PDV");
 			}
 			String diretorioEmpresaImplantacao = diretorioPadrao.get().getPasta()+"\\"+cnpjEmpresa+"\\implantacao";
 			String diretorioEmpresaImplantacaoUpload = diretorioEmpresaImplantacao+"\\upload";
 			utilService.criarDiretorio(diretorioEmpresaImplantacaoUpload);
-			utilService.criarUtilidadeImplantacao(diretorioEmpresaImplantacaoUpload,
+			utilService.criarUtilidadeSemEmpresa(diretorioEmpresaImplantacaoUpload,
 												  cnpjEmpresa.toString(),
 					                              "ARMAZENA OS ARQUIVOS XML QUE GERARAO A IMPLANTACAO DA EMPRESA");
 			
@@ -110,20 +114,22 @@ public class CupomFiscalXMLImplantacaoService {
 			criarDiretoriosDeImplantacao(pasta, empresaFind.get());
 			movimentacaoDeArquivos(mapArquivos);
 			criarDiretoriosDeImportacao(pasta, empresaFind.get());
-			Optional<Util> util = utilService.findByEmpresaAndUtilidade(null, cnpjEmpresa.toString());
-			Optional<TipoCliente> tipoCliente = tipoClienteService.findByEmpresaAndDescricao(empresaFind.get(), "PADRAO");
-			List<Produto> produtos = produtoService.findByEmpresa(empresaFind.get());
-			//
-			setUsuarioGerenteDeLojaEOperador(empresaFind.get(), "GERENTE", form.getEmail());
-			setUsuarioGerenteDeLojaEOperador(empresaFind.get(), "OPERADOR", form.getEmail());
-			//
-			return utilService.dadosDaImplantacao(util, tipoCliente, produtos );
+			
+			Optional<Util> diretorioPDV = utilService.findByEmpresaAndUtilidade(null, "pdv");
+			criarDiretorioPdvEmpresa(diretorioPDV.get().getPasta(), empresaFind.get());
+			
+			setUsuario(empresaFind.get(), "GERENTE", form.getEmail());
+			setUsuario(empresaFind.get(), "OPERADOR", form.getEmail());
+			
+			return new EmpresaDto(empresaFind.get());
 		} catch (IOException | ParseException | ParserConfigurationException | SAXException ex) {
 			throw new CupomFiscalXMLException("Arquivo inconsistente", "Arquivo inconsistente");
 		}
 	}
 	
-	private void setUsuarioGerenteDeLojaEOperador(Empresa empresa, String perfilParametro, String email) {
+	
+	
+	private void setUsuario(Empresa empresa, String perfilParametro, String email) {
 		Usuario usuario = new Usuario();
 		usuario.setEmail(email);
 		usuario.setNome(perfilParametro + " DA EMPRESA "+ empresa.getId());
@@ -148,6 +154,14 @@ public class CupomFiscalXMLImplantacaoService {
 		usuarioPerfil.setUsuario(usuario);
 		usuarioPerfil.setSituacao(SituacaoUsuarioPerfil.ATIVO);
 		usuarioPerfilService.save(usuarioPerfil);
+	}
+	
+	private void criarDiretorioPdvEmpresa(String pasta, Empresa empresa) throws CupomFiscalXMLException {
+		String pastaPdvEmpresa = pasta + "\\" + empresa.getCnpj().toString();
+		Path pdvEmpresa = FileSystems.getDefault().getPath(pastaPdvEmpresa);
+		criarDiretorio(pastaPdvEmpresa, pdvEmpresa);
+		
+		utilService.criarUtilidadeComEmpresa(pastaPdvEmpresa, "pdv_empresa", "ARMAZENA DADOS DOS PDVS DA EMPRESA", empresa);
 	}
 
 	private void criarDiretoriosDeImportacao(String pasta, Empresa empresa) throws CupomFiscalXMLException {
@@ -179,53 +193,53 @@ public class CupomFiscalXMLImplantacaoService {
 
 	private void criarDiretorioImplantacaoImportados(String pastaImplantacao, String cnpj) throws CupomFiscalXMLException {
 		String utilidade = cnpj.toString() + "_implantados_xml";
-		String pastaImplantacaoImportados = pastaImplantacao + "\\importados\\";
+		String pastaImplantacaoImportados = pastaImplantacao + "\\importados";
 		Path pastaImportados = FileSystems.getDefault().getPath(pastaImplantacaoImportados);
 		criarDiretorio(pastaImplantacaoImportados, pastaImportados);
 		
-		utilService.criarUtilidadeImplantacao(pastaImplantacaoImportados, utilidade, "ARMAZENA ARQUIVOS XML IMPLANTADOS COM SUCESSO.");
+		utilService.criarUtilidadeSemEmpresa(pastaImplantacaoImportados, utilidade, "ARMAZENA ARQUIVOS XML IMPLANTADOS COM SUCESSO.");
 	}
 
 	private void criarDiretorioXmlSemCpf(String pastaImportacaoOrigem, Empresa empresa ) throws CupomFiscalXMLException {
-		String pastaImportacaoXmlSemCpf = pastaImportacaoOrigem + "\\importacao\\xml_sem_cpf\\";
+		String pastaImportacaoXmlSemCpf = pastaImportacaoOrigem + "\\importacao\\xml_sem_cpf";
 		Path pastaXmlSemCpf = FileSystems.getDefault().getPath(pastaImportacaoXmlSemCpf);
 		criarDiretorio(pastaImportacaoXmlSemCpf, pastaXmlSemCpf);
 		
-		utilService.criarUtilidadeImportacaoXml(pastaImportacaoXmlSemCpf, "sem_cpf_import_xml", "ARMAZENA ARQUIVOS XML SEM INFORMACAO DO CPF DO CLIENTE.", empresa);
+		utilService.criarUtilidadeComEmpresa(pastaImportacaoXmlSemCpf, "sem_cpf_import_xml", "ARMAZENA ARQUIVOS XML SEM INFORMACAO DO CPF DO CLIENTE.", empresa);
 	}
 
 	private void criarDiretorioUpload(String pastaImportacaoOrigem, Empresa empresa) throws CupomFiscalXMLException {
-		String pastaImportacaoUpload = pastaImportacaoOrigem + "\\importacao\\upload\\";
+		String pastaImportacaoUpload = pastaImportacaoOrigem + "\\importacao\\upload";
 		Path pastaUpload = FileSystems.getDefault().getPath(pastaImportacaoUpload);
 		criarDiretorio(pastaImportacaoUpload, pastaUpload);
 		
-		utilService.criarUtilidadeImportacaoXml(pastaImportacaoUpload, "upload_import_xml", "ARMAZENA ARQUIVOS XML QUE SERAO IMPORTADOS PARA O SISTEMA.", empresa);
+		utilService.criarUtilidadeComEmpresa(pastaImportacaoUpload, "upload_import_xml", "ARMAZENA ARQUIVOS XML QUE SERAO IMPORTADOS PARA O SISTEMA.", empresa);
 	}
 
 	private void criarDiretorioRegistroDuplicado(String pastaImportacaoOrigem, Empresa empresa) throws CupomFiscalXMLException {
-		String pastaImportacaoRegistroDuplicado = pastaImportacaoOrigem + "\\importacao\\registro_duplicado\\";
+		String pastaImportacaoRegistroDuplicado = pastaImportacaoOrigem + "\\importacao\\registro_duplicado";
 		Path pastaRegistroDuplicado = FileSystems.getDefault().getPath(pastaImportacaoRegistroDuplicado);
 		criarDiretorio(pastaImportacaoRegistroDuplicado, pastaRegistroDuplicado);
 		
-		utilService.criarUtilidadeImportacaoXml(pastaImportacaoRegistroDuplicado, 
+		utilService.criarUtilidadeComEmpresa(pastaImportacaoRegistroDuplicado, 
 				       "registro_duplicado_import_xml", "RMAZENA ARQUIVOS XML DUPLICADOS - JA FORAM IMPORTADOS PELO O SISTEMA.",
 				       empresa);
 	}
 
 	private void criarDiretorioImportados(String pastaImportacaoOrigem, Empresa empresa) throws CupomFiscalXMLException {
-		String pastaImportacaoImportados = pastaImportacaoOrigem + "\\importacao\\importados\\";
+		String pastaImportacaoImportados = pastaImportacaoOrigem + "\\importacao\\importados";
 		Path pastaImportados = FileSystems.getDefault().getPath(pastaImportacaoImportados);
 		criarDiretorio(pastaImportacaoImportados, pastaImportados);
 		
-		utilService.criarUtilidadeImportacaoXml(pastaImportacaoImportados, "importados_xml", "ARMAZENA ARQUIVOS XML IMPORTADOS PARA O SISTEMA.", empresa);
+		utilService.criarUtilidadeComEmpresa(pastaImportacaoImportados, "importados_xml", "ARMAZENA ARQUIVOS XML IMPORTADOS PARA O SISTEMA.", empresa);
 	}
 
 	private void criarDiretorioErro(String pastaImportacaoOrigem, Empresa empresa) throws CupomFiscalXMLException {
-		String pastaImportacaoErro = pastaImportacaoOrigem + "\\importacao\\erro\\";
+		String pastaImportacaoErro = pastaImportacaoOrigem + "\\importacao\\erro";
 		Path pastaErro = FileSystems.getDefault().getPath(pastaImportacaoErro);
 		criarDiretorio(pastaImportacaoErro, pastaErro);
 		
-		utilService.criarUtilidadeImportacaoXml(pastaImportacaoErro, "erro_import_xml", "ARMAZENA ARQUIVOS XML QUE SOFRERAM ERROS DURANTE A IMPORTACAO.", empresa);
+		utilService.criarUtilidadeComEmpresa(pastaImportacaoErro, "erro_import_xml", "ARMAZENA ARQUIVOS XML QUE SOFRERAM ERROS DURANTE A IMPORTACAO.", empresa);
 	}
 
 	private void criarDiretorio(String pastaString, Path pastaPath) throws CupomFiscalXMLException {
@@ -312,7 +326,7 @@ public class CupomFiscalXMLImplantacaoService {
 	private void moverArquivos(Path arquivo, String operacao) throws FileNotFoundException, IOException,
 			CupomFiscalXMLException, ParseException, ParserConfigurationException, SAXException, UtilServiceException {
 		String pastaOperacao = utilService.getPastaXML(operacao);
-		String stringArquivoDestino = pastaOperacao + arquivo.getFileName();
+		String stringArquivoDestino = pastaOperacao + "\\" + arquivo.getFileName();
 		Path arquivoDestino = FileSystems.getDefault().getPath(stringArquivoDestino);
 		try {
 			Files.move(arquivo, arquivoDestino, StandardCopyOption.ATOMIC_MOVE);

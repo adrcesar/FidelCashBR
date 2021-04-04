@@ -1,3 +1,4 @@
+delete from pdv;
 delete from util;
 delete from usuario_perfil;
 delete from usuario;

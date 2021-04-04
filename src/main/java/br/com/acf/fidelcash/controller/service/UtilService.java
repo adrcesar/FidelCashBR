@@ -35,12 +35,12 @@ public class UtilService {
 		}
 	}
 	
-	public void criarUtilidadeImplantacao(String pastaImplantacao, String utilidade, String acao) {
+	public void criarUtilidadeSemEmpresa(String pastaImplantacao, String utilidade, String acao) {
 		Util util = setUtilSemEmpresa(pastaImplantacao, utilidade, acao);
 		utilRepository.save(util);
 	}
 	
-	public void criarUtilidadeImportacaoXml(String pastaImportacao, String utilidade, String acao, Empresa empresa) {
+	public void criarUtilidadeComEmpresa(String pastaImportacao, String utilidade, String acao, Empresa empresa) {
 		Util util = setUtilSemEmpresa(pastaImportacao, utilidade, acao);
 		util.setEmpresa(empresa);
 		utilRepository.save(util);
@@ -139,13 +139,13 @@ public class UtilService {
 		}
 	}
 
-	public Util getPastaUtilidadeXML(Empresa empresa, String utilidade) throws CupomFiscalXMLException {
+	public Optional<Util> getPastaUtilidadeXML(Empresa empresa, String utilidade) throws CupomFiscalXMLException {
 		Optional<Util> pasta = utilRepository.findByEmpresaAndUtilidade(empresa, utilidade);
 		if (pasta.isEmpty()) {
 			throw new CupomFiscalXMLException(utilidade + " nao esta cadastrado na coluna utilidade da tabela Util",
 					utilidade + " nao esta cadastrado na coluna utilidade da tabela Util");
 		} else {
-			return pasta.get();
+			return pasta;
 		}
 	}
 

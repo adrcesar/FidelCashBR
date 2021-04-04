@@ -1,4 +1,4 @@
-import React, { FormEvent, useState } from "react";
+import React, { FormEvent, useEffect, useState } from "react";
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 
@@ -66,34 +66,38 @@ const FormImplantacao: React.FC = () => {
             formData.append('xml', files[x]);
         }
 
-        console.log(formData.get('cnpj'));
         var token = localStorage.getItem('@FIDELCASH/TOKEN');
         var tamanhoToken = token?.length;
         token = 'Bearer ' + token!.substring(1, (tamanhoToken! - 1)) //'tamanhoToken'; // náo quero o primeiro nem o último caracter
-        api.post("/cupomfiscalxml/implantacao", formData, {
-            headers: {
-                'Authorization': token,
-                'Content-Type': 'application/json',
-            },
-        })
-            .then(response => {
-                setMensagem({
-                    open: true,
-                    texto: 'Empresa implantada',
-                    severity: 'success'
-                })
-                setCnpj('');
-                setEmail('');
-                setFiles(['']);
-            })
-            .catch((error) => {
 
-                setMensagem({
-                    open: true,
-                    texto: error.response.data.erroMensagem,
-                    severity: 'error'
-                })
+
+        
+
+            api.post("/cupomfiscalxml/implantacao", formData, {
+                headers: {
+                    'Authorization': token,
+                    'Content-Type': 'application/json',
+                },
             })
+                .then(response => {
+                    setMensagem({
+                        open: true,
+                        texto: 'Empresa implantada',
+                        severity: 'success'
+                    })
+                    setCnpj('');
+                    setEmail('');
+                    setFiles(['']);
+                })
+                .catch((error) => {
+
+                    setMensagem({
+                        open: true,
+                        texto: error.response.data.mensagemErro,
+                        severity: 'error'
+                    })
+                });
+        
     }
 
     const classes = useStyles();

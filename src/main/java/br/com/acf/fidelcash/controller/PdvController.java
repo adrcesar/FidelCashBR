@@ -41,9 +41,10 @@ public class PdvController {
 		try {
 			Pdv pdv = form.converter(empresaService);
 			pdvService.save(pdv);
-			//pdv = pdvService.findByMacAdress(pdv.getMacAddress());
+			pdvService.criaXmlDeConfiguracaoDoPdv(pdv);
+			pdvService.copiarArquivosDePdvGeralParaPdvEmpresa(pdv);
 			
-			
+					
 			URI uri = uriBuilder.path("/pdv/{id}").buildAndExpand(pdv.getId()).toUri();
 			return ResponseEntity.created(uri).body(new PdvDto(pdv));
 		} catch (Exception e) {

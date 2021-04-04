@@ -66,7 +66,6 @@ const Importacao: React.FC = () => {
         
         for (var x = 0; x < files.length; x++) {
             formData.append('xml', files[x]);
-            console.log(formData.get('xml'));
         }
 
         

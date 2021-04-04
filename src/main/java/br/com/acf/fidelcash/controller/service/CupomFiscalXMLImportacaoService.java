@@ -26,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.xml.sax.SAXException;
 
 import br.com.acf.fidelcash.controller.dto.ImportacaoDto;
+import br.com.acf.fidelcash.controller.form.ImportacaoForm;
 import br.com.acf.fidelcash.controller.service.exception.ClienteServiceException;
 import br.com.acf.fidelcash.controller.service.exception.CupomFiscalItemServiceException;
 import br.com.acf.fidelcash.controller.service.exception.CupomFiscalServiceException;
@@ -39,6 +40,7 @@ import br.com.acf.fidelcash.modelo.CupomFiscal;
 import br.com.acf.fidelcash.modelo.CupomFiscalItem;
 import br.com.acf.fidelcash.modelo.CupomFiscalXML;
 import br.com.acf.fidelcash.modelo.Empresa;
+import br.com.acf.fidelcash.modelo.Pdv;
 import br.com.acf.fidelcash.modelo.Produto;
 import br.com.acf.fidelcash.modelo.TipoCliente;
 import br.com.acf.fidelcash.modelo.Util;
@@ -64,84 +66,64 @@ public class CupomFiscalXMLImportacaoService {
 
 	@Autowired
 	private CupomFiscalItemService cfItemService;
-	
+
 	@Autowired
 	private ContaCorrenteService ccService;
 
 	@Autowired
 	private CupomFiscalXMLService cfXMLService;
-	
+
 	@Autowired
 	private CupomFisccalXMLUploadService uploadService;
 
-	
-	
-	
-	
-	
+	@Autowired
+	private PdvService pdvService;
+
 	public ImportacaoDto importarXml2(MultipartFile[] xml) throws CupomFiscalXMLUploadServiceException {
 		Optional<Util> diretorioPadrao = utilService.findByEmpresaAndUtilidade(null, "DIRETORIO_PADRAO");
-		String diretorioRaiz = diretorioPadrao.get().getPasta();    
+		String diretorioRaiz = diretorioPadrao.get().getPasta();
 		String upload = "upload";
 		uploadService.salvarArquivos(diretorioRaiz, upload, xml);
-		
+
 		List<String> arquivos = new ArrayList<String>();
 		arquivos.add("teste de arquivo");
 		ImportacaoDto importacaoDto = new ImportacaoDto(diretorioRaiz, arquivos);
-		
-		
+
 		return importacaoDto;
 	}
 
 	@Transactional(rollbackFor = { Exception.class })
-	public List<ImportacaoDto> importarXml(MultipartFile[] XMLs) throws IOException, ParserConfigurationException, SAXException,
-			ParseException, CupomFiscalXMLException, UtilServiceException, CupomFiscalXMLUploadServiceException {
+	public List<ImportacaoDto> importarXml(ImportacaoForm form)
+			throws IOException, ParserConfigurationException, SAXException, ParseException, CupomFiscalXMLException,
+			UtilServiceException, CupomFiscalXMLUploadServiceException {
 		try {
-			
-			Optional<Util> diretorioPadrao = utilService.findByEmpresaAndUtilidade(null, "DIRETORIO_PADRAO");
-			String diretorioRaiz = diretorioPadrao.get().getPasta();    
+
+			Optional<Pdv> pdv = pdvService.findByMacAdress(form.getMacAddress());
+			if (pdv.isEmpty()) {
+				throw new CupomFiscalXMLException("PDV não cadastrado para envio de cupons fiscais",
+						"PDV não cadastrado para envio de cupons fiscais");
+			}
+
+			Optional<Util> diretorioUpload = utilService.getPastaUtilidadeXML(pdv.get().getEmpresa(),
+					"upload_import_xml");
+			if (diretorioUpload.isEmpty()) {
+				throw new CupomFiscalXMLException("Empresa enviada pelo PDV não está cadastrada",
+						"Empresa enviada pelo PDV não está cadastrada");
+			}
+
+			int posicaoUltimaBarra = diretorioUpload.get().getPasta().lastIndexOf("\\");
+			String diretorioUploadRaiz = diretorioUpload.get().getPasta().substring(0, posicaoUltimaBarra);
 			String upload = "upload";
-			uploadService.salvarArquivos(diretorioRaiz, upload, XMLs);
-			
-			//
-			List<Util> pastas = utilService.getPastasImportacaoXML("upload_import_xml");
-			Path dir = Paths.get(diretorioRaiz.concat("/upload"));
-			DirectoryStream<Path> directoryUploadGeral = Files.newDirectoryStream(dir, "*.xml*");
-			
-			for (Path arquivo : directoryUploadGeral) {
-				for (int i = 0; i < pastas.size(); i++) {
-					String xml = arquivo.toString();
-					CupomFiscalXML cfXML = cfXMLService.GerarDadosByXml(xml);
-					Empresa empresaXML = cfXML.getEmpresa();
-					
-					if(empresaXML.getCnpj().compareTo(pastas.get(i).getEmpresa().getCnpj()) == 0) {
-						String stringArquivoDestino = pastas.get(i).getPasta() + arquivo.getFileName();
-						Path arquivoDestino = FileSystems.getDefault().getPath(stringArquivoDestino);
-						Files.move(arquivo, arquivoDestino, StandardCopyOption.ATOMIC_MOVE);
-						
-					}
-					
-				}
-			}
-			directoryUploadGeral.close();
-			
-			//String xml = arquivo.toString();
-			//CupomFiscalXML cfXML = cfXMLService.GerarDadosByXml(xml);
-			
-			//
-			
-			//List<Util> pastas = utilService.getPastasImportacaoXML("upload_import_xml");
-			
+			uploadService.salvarArquivos(diretorioUploadRaiz, upload, form.getXml());
+
 			List<ImportacaoDto> importacaoDto = new ArrayList<ImportacaoDto>();
-			for (int i = 0; i < pastas.size(); i++) {
-				
-				
-				Map<Path, String> mapArquivos = importarXml(pastas.get(i).getPasta(), pastas.get(i).getEmpresa());
-				List<String> arquivos = movimentacaoDeArquivos(mapArquivos, pastas.get(i).getEmpresa());
-				Collections.sort(arquivos);
-				ImportacaoDto importacaoEmpresaDto = setImportacaoDto(pastas.get(i).getPasta(), arquivos);
-				importacaoDto.add(importacaoEmpresaDto);
-			}
+
+			Map<Path, String> mapArquivos = importarXml(diretorioUpload.get().getPasta(), pdv.get().getEmpresa());
+			List<String> arquivos = movimentacaoDeArquivos(mapArquivos, pdv.get().getEmpresa());
+			Collections.sort(arquivos);
+			ImportacaoDto importacaoEmpresaDto = setImportacaoDto(diretorioUpload.get().getPasta(), arquivos);
+			importacaoDto.add(importacaoEmpresaDto);
+
 			return importacaoDto;
 		} catch (IOException | ParseException | ParserConfigurationException | SAXException ex) {
 			throw new CupomFiscalXMLException("Arquivo inconsistente", "Arquivo inconsistente");
@@ -188,7 +170,7 @@ public class CupomFiscalXMLImportacaoService {
 						mapArquivo.put(arquivoException, "data_cupom_invalida");
 					} else if (ex.getMensagem().equals("Bonus do período inferior a 1%")) {
 						mapArquivo.put(arquivoException, "bonus_inferior_1_porcento");
-					}else {
+					} else {
 						mapArquivo.put(arquivoException, "erro_desconhecido");
 					}
 				}
@@ -224,12 +206,12 @@ public class CupomFiscalXMLImportacaoService {
 		} else {
 			oper = "erro_import_xml";
 		}
-		Util pastaOperacao = utilService.getPastaUtilidadeXML(empresa, oper);
+		Optional<Util> pastaOperacao = utilService.getPastaUtilidadeXML(empresa, oper);
 		String stringArquivoDestino;
 		if (oper.equals("erro_import_xml")) {
-			stringArquivoDestino = pastaOperacao.getPasta() + operacao + "_" + arquivo.getFileName();
+			stringArquivoDestino = pastaOperacao.get().getPasta() + "\\" + operacao + "_" + arquivo.getFileName();
 		} else {
-			stringArquivoDestino = pastaOperacao.getPasta() + arquivo.getFileName();
+			stringArquivoDestino = pastaOperacao.get().getPasta() + "\\" + arquivo.getFileName();
 		}
 		Path arquivoDestino = FileSystems.getDefault().getPath(stringArquivoDestino);
 		try {
@@ -259,11 +241,11 @@ public class CupomFiscalXMLImportacaoService {
 
 			List<Produto> produtos = cfXML.getProdutos();
 			CupomFiscal cupomFiscal = cfXML.getCupomFiscal();
-			
-			//int posicao = xml.lastIndexOf("\\");
-			//String teste = xml.substring(posicao);
+
+			// int posicao = xml.lastIndexOf("\\");
+			// String teste = xml.substring(posicao);
 			cupomFiscal.setArquivo(xml.substring(xml.lastIndexOf("\\") + 1));
-			
+
 			List<CupomFiscalItem> itens = cfXML.getItens();
 			Cliente cliente = cfXML.getCliente();
 
@@ -273,7 +255,6 @@ public class CupomFiscalXMLImportacaoService {
 			ContaCorrente cc = ccService.setContaCorrente(cliente);
 			cupomFiscal = cfService.setCupomFiscal(cupomFiscal, cliente);
 			cfItemService.setCupomFiscalItem(produtos, itens, cupomFiscal, cc);
-			
 
 		} catch (IOException | ParseException | ParserConfigurationException | SAXException e) {
 			throw new CupomFiscalXMLException("Arquivo inconsistente", "Arquivo inconsistente");
@@ -287,10 +268,9 @@ public class CupomFiscalXMLImportacaoService {
 			throw new CupomFiscalXMLException(e.getMensagem(), e.getMensagem());
 		} catch (CupomFiscalItemServiceException e) {
 			throw new CupomFiscalXMLException(e.getMensagem(), e.getMensagem());
-		} //catch (ContaCorrenteServiceException e) {
-			//throw new CupomFiscalXMLException(e.getMensagem(), e.getMensagem());
-		//}
+		} // catch (ContaCorrenteServiceException e) {
+			// throw new CupomFiscalXMLException(e.getMensagem(), e.getMensagem());
+			// }
 	}
 
-	
 }

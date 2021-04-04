@@ -1,5 +1,8 @@
 package br.com.acf.fidelcash.controller.form;
 
+import java.math.BigInteger;
+import java.util.Optional;
+
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
@@ -15,16 +18,22 @@ public class PdvForm {
 	private String macAddress;
 	
 	@NotNull @NotEmpty
-	private Integer idEmpresa;
+	private BigInteger cnpj;
+	
+	@NotNull @NotEmpty
+	private String pastaDeUpload;
 
 	
 	
 	public Pdv converter(EmpresaService empresaService) throws EmpresaServiceException {
-		Empresa empresa = empresaService.findById(this.idEmpresa);
+		Optional<Empresa> empresa = empresaService.findByCnpj(this.cnpj);
+		if (empresa.isEmpty()) {
+			throw new EmpresaServiceException("CNPJ não encontrado", "CNPJ não encontrado");
+		}
 		
 		SituacaoPdv situacao = SituacaoPdv.ATIVO;
 		
-		Pdv pdv = new Pdv(this.macAddress, empresa, situacao);
+		Pdv pdv = new Pdv(this.macAddress, empresa.get(), situacao, this.pastaDeUpload);
 		
 		return pdv;
 	}
@@ -43,25 +52,27 @@ public class PdvForm {
 
 
 
-	public Integer getIdEmpresa() {
-		return idEmpresa;
+	public BigInteger getCnpj() {
+		return cnpj;
 	}
 
 
 
-	public void setIdEmpresa(Integer idEmpresa) {
-		this.idEmpresa = idEmpresa;
+	public void setCnpj(BigInteger cnpj) {
+		this.cnpj = cnpj;
 	}
-	
-	
-
-	
 
 
-	
-	
-	
-	
-	
-	
+
+	public String getPastaDeUpload() {
+		return pastaDeUpload;
+	}
+
+
+
+	public void setPastaDeUpload(String pastaDeUpload) {
+		this.pastaDeUpload = pastaDeUpload;
+	}
+
+
 }
